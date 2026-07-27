@@ -1,0 +1,7 @@
+* text=auto
+*.sh text eol=lf
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary

@@ -1,0 +1,25 @@
+# Bundler
+.bundle
+vendor
+Gemfile.lock
+*.gem
+
+# Jekyll
+.jekyll-cache
+.jekyll-metadata
+_site
+
+# Node
+node_modules
+package-lock.json
+
+# Editors and operating systems
+.idea
+.vscode
+*~
+.DS_Store
+Thumbs.db
+
+# Theme build artifacts
+_sass/vendors
+assets/js/dist

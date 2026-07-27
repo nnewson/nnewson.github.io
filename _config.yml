@@ -1,0 +1,132 @@
+# Site configuration
+theme: jekyll-theme-chirpy
+
+lang: en
+timezone: Europe/London
+
+title: fireEngine Devlog
+tagline: Building a 3D engine, one release at a time
+description: >-
+  Engineering notes, release deep-dives, and lessons learned while building
+  fireEngine, an open-source 3D engine.
+
+url: "https://nnewson.github.io"
+baseurl: ""
+
+github:
+  username: nnewson
+
+social:
+  name: Nick Newson
+  links:
+    - https://github.com/nnewson
+    - https://github.com/nnewson/fireEngine-tutorial
+
+avatar: "https://github.com/nnewson.png"
+social_preview_image:
+
+theme_mode: dark
+toc: true
+paginate: 10
+
+actions:
+  edit_post:
+    enabled: true
+    url: "https://github.com/nnewson/nnewson.github.io/edit/main"
+    static_url: false
+
+comments:
+  provider:
+
+analytics:
+  google:
+    id:
+  goatcounter:
+    id:
+  umami:
+    id:
+    domain:
+  matomo:
+    id:
+    domain:
+  cloudflare:
+    id:
+  fathom:
+    id:
+
+pageviews:
+  provider:
+
+pwa:
+  enabled: true
+  cache:
+    enabled: true
+    deny_paths:
+
+kramdown:
+  footnote_backlink: "&#8617;&#xfe0e;"
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
+collections:
+  tabs:
+    output: true
+    sort_by: order
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      comments: false
+      toc: true
+      permalink: /posts/:title/
+  - scope:
+      path: _drafts
+    values:
+      comments: false
+  - scope:
+      path: ""
+      type: tabs
+    values:
+      layout: page
+      permalink: /:title/
+
+sass:
+  style: compressed
+
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  profile: false
+  blanklines: false
+  ignore:
+    envs: [development]
+
+exclude:
+  - "*.gem"
+  - "*.gemspec"
+  - docs
+  - tools
+  - README.md
+  - LICENSE
+  - purgecss.js
+  - "*.config.js"
+  - "package*.json"
+
+jekyll-archives:
+  enabled: [categories, tags]
+  layouts:
+    category: category
+    tag: tag
+  permalinks:
+    tag: /tags/:name/
+    category: /categories/:name/
