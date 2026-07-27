@@ -1,6 +1,18 @@
 - type: github
   icon: "fab fa-github"
 
+- type: linkedin
+  icon: "fab fa-linkedin"
+  url: "https://www.linkedin.com/in/nick-newson/"
+
+- type: bluesky
+  icon: "fa-brands fa-bluesky"
+  url: "https://bsky.app/profile/nicknewson.bsky.social"
+
+- type: email
+  icon: "fas fa-envelope"
+  noblank: true
+
 - type: rss
   icon: "fas fa-rss"
   noblank: true
