@@ -1,5 +1,5 @@
 ---
-title: Building fireEngine in Public
+title: Building fireEngine with a cleaner design
 date: 2026-07-27 00:00:00 +0100
 categories: [fireEngine, Development]
 tags: [fireengine, 3d-engine, devlog]
@@ -30,4 +30,5 @@ evolves over time, and as a practical record of how a renderer grows from its
 first frame into a larger 3D system, and as a cleaner refactor of my
 [fireEngine](https://github.com/nnewson/fireEngine) repo.
 
-The first engine release is next.
+The first release will get us setup with building the most basic Vulkan
+process.

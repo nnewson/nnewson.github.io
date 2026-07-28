@@ -4,8 +4,8 @@ theme: jekyll-theme-chirpy
 lang: en
 timezone: Europe/London
 
-title: A software development blog
-tagline: Building a 3D engine, one release at a time
+title: Nick Newson's devlog
+tagline: From REngine to fireEngine
 description: >-
   Engineering notes, release deep-dives, and lessons learned while building
   fireEngine, an open-source 3D engine.
