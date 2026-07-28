@@ -25,8 +25,9 @@ matching post here that explains:
 - how to build or explore that exact version; and
 - what the release unlocks next.
 
-That pairing should make the project useful in two ways: as an engine that
+That pairing should make the project useful in three ways: as an engine that
 evolves over time, and as a practical record of how a renderer grows from its
-first frame into a larger 3D system.
+first frame into a larger 3D system, and as a cleaner refactor of my
+[fireEngine](https://github.com/nnewson/fireEngine) repo.
 
 The first engine release is next.
