@@ -3,8 +3,6 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-# From REngine to fireEngine
-
 After university, my first job was as a software engineer at
 [Rare](https://www.rare.co.uk). I joined its R&D team and worked on what became
 known as `REngine`: a shared 3D engine intended for several future GameCube
