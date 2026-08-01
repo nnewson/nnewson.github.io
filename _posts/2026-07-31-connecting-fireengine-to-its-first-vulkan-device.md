@@ -161,6 +161,8 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(VulkanHeaders 1.4 CONFIG REQUIRED)
 find_package(VulkanLoader 1.4 CONFIG REQUIRED)
 
+# ...
+
 target_link_libraries(fireEngineTutorial PRIVATE
     glfw
     Vulkan::Headers
@@ -1106,7 +1108,7 @@ queues and build the first swapchain on top of them.
 ## Recommended reading
 
 - [Vulkan Programming Guide][reading-vulkan] — a detailed guide to the API's
-  device, queue, command, memory, synchronisation, and presentation model. Its
+  device, queue, command, memory, synchronization, and presentation model. Its
   examples predate current Vulkan, but the foundational explanations remain
   valuable.
 - [GLFW documentation][reading-glfw] — the official guide to GLFW's window,
