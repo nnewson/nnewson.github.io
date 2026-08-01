@@ -1,6 +1,6 @@
 # fireEngine Devlog
 
-The source for [nnewson.github.io](https://nnewson.github.io), a Jekyll blog
+The source for [nnewson.dev](https://nnewson.dev), a Jekyll blog
 using the [Chirpy](https://github.com/cotes2020/jekyll-theme-chirpy) theme.
 
 The blog follows the development of
@@ -21,7 +21,7 @@ One repository setting must be enabled on GitHub:
    in the Actions tab.
 
 Once that workflow succeeds, the site is available at
-<https://nnewson.github.io>.
+<https://nnewson.dev>.
 
 Pull requests run a separate build and link check without deploying.
 

@@ -1,0 +1,21 @@
+<!--
+  Favicons
+
+  Local override: a copy of the jekyll-theme-chirpy 7.6 include, using the site
+  avatar for browser and device icons. Two lines from the theme's version are
+  deliberately absent, because the matching files are not shipped:
+    - favicon.svg
+    - the site.webmanifest link, which the theme guards with site.pwa.enabled
+
+  Restore both the file and the link together if PWA support is re-enabled.
+
+  After a theme upgrade, diff this file against the gem's copy:
+    diff "$(bundle show jekyll-theme-chirpy)/_includes/favicons.html" \
+      _includes/favicons.html
+-->
+
+{% capture favicon_path %}{{ '/assets/img/favicons' | relative_url }}{% endcapture %}
+
+<link rel="icon" type="image/png" href="{{ favicon_path }}/favicon-96x96.png" sizes="96x96">
+<link rel="shortcut icon" href="{{ favicon_path }}/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ favicon_path }}/apple-touch-icon.png">

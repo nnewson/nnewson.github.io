@@ -10,7 +10,7 @@ description: >-
   Engineering notes, release deep-dives, and lessons learned while building
   fireEngine, an open-source 3D engine.
 
-url: "https://nnewson.github.io"
+url: "https://nnewson.dev"
 baseurl: ""
 
 github:
@@ -24,8 +24,9 @@ social:
     - https://github.com/nnewson/fireEngine-tutorial
     - https://www.linkedin.com/in/nick-newson/
 
-avatar: "https://github.com/nnewson.png"
-social_preview_image:
+avatar: "/assets/img/avatar.jpg"
+social_preview_image: "/assets/img/social-preview.jpg"
+doxygen_url: "https://nnewson.dev/fireEngine-tutorial/"
 
 theme_mode:
 toc: true

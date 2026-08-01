@@ -1087,7 +1087,7 @@ queues and build the first swapchain on top of them.
 [source-main]: https://github.com/nnewson/fireEngine-tutorial/blob/0.2/src/main.cpp
 [source-ci]: https://github.com/nnewson/fireEngine-tutorial/blob/0.2/.github/workflows/ci.yml
 [source-doxygen]: https://github.com/nnewson/fireEngine-tutorial/blob/0.2/docs/Doxyfile
-[api-reference]: https://nnewson.github.io/fireEngine-tutorial/
+[api-reference]: https://nnewson.dev/fireEngine-tutorial/
 [glfw-vulkan-guide]: https://www.glfw.org/docs/latest/vulkan_guide.html
 [vulkan-window-surface]: https://docs.vulkan.org/tutorial/latest/03_Drawing_a_triangle/01_Presentation/00_Window_surface.html
 [vulkan-physical-devices]: https://docs.vulkan.org/tutorial/latest/03_Drawing_a_triangle/00_Setup/03_Physical_devices_and_queue_families.html
