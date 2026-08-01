@@ -507,7 +507,7 @@ The standard headers provide exception handling and console output.
 int main()
 try
 {
-    // Startup work...
+    // ...
 }
 catch (const std::exception& error)
 {

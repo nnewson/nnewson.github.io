@@ -58,7 +58,7 @@ safely.
 
 - [Real-Time Rendering](https://www.realtimerendering.com/) — the classic
   end-to-end reference for real-time rendering systems, spanning the graphics
-  pipeline, hardware, transforms, shading, effects, optimisation, and
+  pipeline, hardware, transforms, shading, effects, optimization, and
   acceleration techniques.
 
 The [Reading page]({% link _tabs/reading.md %}) keeps the site-wide list in one
