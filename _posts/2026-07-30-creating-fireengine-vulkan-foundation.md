@@ -29,6 +29,22 @@ the engine evolves.
 > together.
 {: .prompt-info }
 
+## Introducing the foundation
+
+This release introduces three pieces that solve different parts of the same
+startup problem:
+
+- **vcpkg** records the third-party packages fireEngine needs and restores
+  repeatable versions of them on each development machine and CI runner;
+- **CMake** turns the source and dependency declarations into the native build
+  rules used by Linux, macOS, and Windows; and
+- a **Vulkan instance** establishes the application's connection to the Vulkan
+  loader before any physical device, queue, or rendering resource can be used.
+
+Together they create a narrow but complete foundation: dependencies can be
+restored, the program can be built consistently, and the executable can prove
+that Vulkan is available without introducing a window or rendering loop yet.
+
 ## What we are building
 
 The repository is intentionally compact:
@@ -722,6 +738,20 @@ That is enough infrastructure for the next layer: enumerate physical devices,
 inspect their queue families and capabilities, and decide how fireEngine will
 select a GPU.
 
+## Recommended reading
+
+- [Vulkan Programming Guide][reading-vulkan] — written against an earlier
+  version of Vulkan, but still a definitive guide to the API's core concepts.
+- [Modern CMake for C++][reading-cmake] — a practical guide to target-based,
+  cross-platform CMake projects and their surrounding build workflows.
+- [vcpkg documentation][reading-vcpkg] — the official reference for manifests,
+  registries, versioning, and CMake integration.
+- [How to Vulkan][reading-how-to-vulkan] — a compact, code-first tutorial that
+  builds a modern Vulkan 1.3 renderer while explaining how its major systems
+  fit together.
+
+The [Reading page][reading-page] keeps the site-wide list in one place.
+
 [repository]: https://github.com/nnewson/fireEngine-tutorial
 [source-vcpkg-manifest]: https://github.com/nnewson/fireEngine-tutorial/blob/0.1/vcpkg.json
 [source-vcpkg-configuration]: https://github.com/nnewson/fireEngine-tutorial/blob/0.1/vcpkg-configuration.json
@@ -733,3 +763,8 @@ select a GPU.
 [vcpkg-cmake-integration]: https://learn.microsoft.com/vcpkg/users/buildsystems/cmake-integration
 [vulkan-driver-discovery]: https://vulkan.lunarg.com/doc/view/latest/mac/LoaderDriverInterface.html
 [vulkan-instance-guide]: https://docs.vulkan.org/tutorial/latest/03_Drawing_a_triangle/00_Setup/01_Instance.html
+[reading-page]: {% link _tabs/reading.md %}
+[reading-vulkan]: https://www.vulkanprogrammingguide.com
+[reading-cmake]: https://github.com/PacktPublishing/Modern-CMake-for-Cpp
+[reading-vcpkg]: https://learn.microsoft.com/en-gb/vcpkg/
+[reading-how-to-vulkan]: https://howtovulkan.com

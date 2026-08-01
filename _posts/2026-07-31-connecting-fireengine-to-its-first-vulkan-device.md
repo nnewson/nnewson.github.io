@@ -31,6 +31,37 @@ continues to match the published source as fireEngine evolves.
 > toolchain and first-instance setup. This post concentrates on what changed.
 {: .prompt-info }
 
+## Introducing GLFW, surfaces, devices, queues, and validation
+
+Release 0.1 established a connection to Vulkan without choosing any hardware.
+Release 0.2 introduces six pieces that will later turn that connection into a
+usable rendering endpoint:
+
+- **GLFW** provides the platform-independent window and event layer. It tells
+  fireEngine which Vulkan instance extensions the active window system needs,
+  and creates the window itself without exposing platform-specific code;
+- a **window surface** is Vulkan's handle for the presentable area of that
+  window, created for it by GLFW. It belongs to the instance rather than to any
+  device, and it is what the later checks are made against: presentation
+  support is a property of a queue family paired with a surface, never of the
+  hardware alone;
+- a **physical device** represents a GPU or software implementation exposed by
+  the driver, together with the capabilities fireEngine must inspect;
+- a **logical device** is fireEngine's configured interface to the selected
+  physical device, with the required extensions, features, and queues enabled;
+- a **queue** is where the application submits work. This milestone retrieves
+  one for graphics and one for presentation, using the same underlying queue
+  when a family supports both roles; and
+- the **validation layer** and its **debug messenger** are the release's
+  optional development aid. The layer checks API usage against the
+  specification, and the messenger delivers what it finds to fireEngine's
+  logger. Both are requested only in Debug builds, and even then only when the
+  runtime actually provides them.
+
+The split between physical and logical devices lets fireEngine reject
+unsuitable hardware before requesting resources from it, then create only the
+features and execution paths the renderer is preparing to use.
+
 ## Extend the startup chain
 
 Release 0.1 stopped after the first two Vulkan objects:
@@ -1072,6 +1103,27 @@ is sound before image ownership and synchronization make the renderer more
 complicated. The next milestone can start from known graphics and presentation
 queues and build the first swapchain on top of them.
 
+## Recommended reading
+
+- [Vulkan Programming Guide][reading-vulkan] — a detailed guide to the API's
+  device, queue, command, memory, synchronisation, and presentation model. Its
+  examples predate current Vulkan, but the foundational explanations remain
+  valuable.
+- [GLFW documentation][reading-glfw] — the official guide to GLFW's window,
+  event, input, and Vulkan surface APIs, including their platform and lifetime
+  rules.
+- [Modern CMake for C++][reading-cmake] — the target-based model behind this
+  release's `find_package` calls, per-target compile definitions, and
+  configuration-dependent generator expressions.
+- [vcpkg documentation][reading-vcpkg] — the reference for the manifest
+  features and platform conditions used here to add GLFW and the Vulkan loader
+  without applying the Linux-only integrations everywhere.
+- [How to Vulkan][reading-how-to-vulkan] — a compact, code-first tutorial that
+  builds a modern Vulkan 1.3 renderer while explaining how its major systems
+  fit together.
+
+The [Reading page][reading-page] keeps the site-wide list in one place.
+
 [release-0-1]: {{ page.previous_release_url }}
 [release-0-2]: {{ page.release_url }}
 [foundation-post]: {% post_url 2026-07-30-creating-fireengine-vulkan-foundation %}
@@ -1094,3 +1146,9 @@ queues and build the first swapchain on top of them.
 [vulkan-logical-device]: https://docs.vulkan.org/tutorial/latest/03_Drawing_a_triangle/00_Setup/04_Logical_device_and_queues.html
 [vulkan-wsi]: https://docs.vulkan.org/spec/latest/chapters/VK_KHR_surface/wsi.html
 [std-expected]: https://en.cppreference.com/w/cpp/utility/expected
+[reading-page]: {% link _tabs/reading.md %}
+[reading-vulkan]: https://www.vulkanprogrammingguide.com
+[reading-glfw]: https://www.glfw.org/docs/latest/
+[reading-cmake]: https://github.com/PacktPublishing/Modern-CMake-for-Cpp
+[reading-vcpkg]: https://learn.microsoft.com/en-gb/vcpkg/
+[reading-how-to-vulkan]: https://howtovulkan.com
