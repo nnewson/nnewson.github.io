@@ -32,6 +32,12 @@ dependency management, testing, packaging, and cross-platform automation.
 A compact, code-first tutorial that builds a modern Vulkan 1.3 renderer while
 explaining how its major systems fit together.
 
+### [Your first Slang shader](https://shader-slang.org/docs/first-slang-shader)
+
+The official first step into Slang, covering HLSL-like shader source, entry
+points, command-line compilation, SPIR-V output, and cross-target code
+generation.
+
 ### [GLFW documentation](https://www.glfw.org/docs/latest/)
 
 The official guide to GLFW's cross-platform window, input, event, and Vulkan
