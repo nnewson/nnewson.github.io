@@ -929,6 +929,10 @@ driver has already accepted.
 - [How to Vulkan][reading-how-to-vulkan] — a compact, code-first modern Vulkan
   guide whose shader and graphics-pipeline sections provide a useful comparison
   with this tutorial's Vulkan-Hpp RAII and dynamic-rendering approach.
+- [Professional CMake][reading-cmake] — widely regarded as the de facto guide
+  to modern CMake, written by Craig Scott, one of CMake's maintainers. Its
+  coverage of imported targets, custom commands, and generated outputs provides
+  useful context for the shader build graph created here.
 - [Your first Slang shader][reading-first-slang] — the official introduction
   to Slang source, entry points, `slangc`, cross-target compilation, SPIR-V,
   and deterministic resource bindings.
@@ -957,4 +961,5 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [reading-page]: {% link _tabs/reading.md %}
 [reading-vulkan]: https://www.vulkanprogrammingguide.com
 [reading-how-to-vulkan]: https://howtovulkan.com
+[reading-cmake]: https://crascit.com/professional-cmake/
 [reading-first-slang]: https://shader-slang.org/docs/first-slang-shader
