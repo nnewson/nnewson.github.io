@@ -1114,9 +1114,10 @@ queues and build the first swapchain on top of them.
 - [GLFW documentation][reading-glfw] — the official guide to GLFW's window,
   event, input, and Vulkan surface APIs, including their platform and lifetime
   rules.
-- [Modern CMake for C++][reading-cmake] — the target-based model behind this
-  release's `find_package` calls, per-target compile definitions, and
-  configuration-dependent generator expressions.
+- [Professional CMake][reading-cmake] — widely regarded as the de facto guide
+  to modern CMake, written by Craig Scott, one of CMake's maintainers. Its
+  target-based model underpins this release's `find_package` calls, per-target
+  compile definitions, and configuration-dependent generator expressions.
 - [vcpkg documentation][reading-vcpkg] — the reference for the manifest
   features and platform conditions used here to add GLFW and the Vulkan loader
   without applying the Linux-only integrations everywhere.
@@ -1151,6 +1152,6 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [reading-page]: {% link _tabs/reading.md %}
 [reading-vulkan]: https://www.vulkanprogrammingguide.com
 [reading-glfw]: https://www.glfw.org/docs/latest/
-[reading-cmake]: https://github.com/PacktPublishing/Modern-CMake-for-Cpp
+[reading-cmake]: https://crascit.com/professional-cmake/
 [reading-vcpkg]: https://learn.microsoft.com/en-gb/vcpkg/
 [reading-how-to-vulkan]: https://howtovulkan.com

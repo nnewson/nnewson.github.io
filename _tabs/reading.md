@@ -20,11 +20,6 @@ Written against an earlier version of Vulkan, but still a definitive,
 example-rich guide to the API's core model, including queues, commands, memory,
 synchronization, and presentation.
 
-### [Modern CMake for C++](https://github.com/PacktPublishing/Modern-CMake-for-Cpp)
-
-A practical guide to target-based CMake that connects project structure,
-dependency management, testing, packaging, and cross-platform automation.
-
 ## Websites
 
 ### [How to Vulkan](https://howtovulkan.com)
@@ -42,6 +37,12 @@ generation.
 
 The official guide to GLFW's cross-platform window, input, event, and Vulkan
 surface APIs, including the lifetime and platform rules behind them.
+
+### [Professional CMake](https://crascit.com/professional-cmake/)
+
+Widely regarded as the de facto guide to modern CMake, written by Craig Scott,
+one of CMake's maintainers. It covers practical, target-based project structure,
+dependency management, testing, packaging, and cross-platform workflows.
 
 ### [vcpkg documentation](https://learn.microsoft.com/en-gb/vcpkg/)
 

@@ -742,8 +742,9 @@ select a GPU.
 
 - [Vulkan Programming Guide][reading-vulkan] — written against an earlier
   version of Vulkan, but still a definitive guide to the API's core concepts.
-- [Modern CMake for C++][reading-cmake] — a practical guide to target-based,
-  cross-platform CMake projects and their surrounding build workflows.
+- [Professional CMake][reading-cmake] — widely regarded as the de facto guide
+  to modern CMake, written by Craig Scott, one of CMake's maintainers. It covers
+  practical, target-based project structure and cross-platform workflows.
 - [vcpkg documentation][reading-vcpkg] — the official reference for manifests,
   registries, versioning, and CMake integration.
 - [How to Vulkan][reading-how-to-vulkan] — a compact, code-first tutorial that
@@ -765,6 +766,6 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [vulkan-instance-guide]: https://docs.vulkan.org/tutorial/latest/03_Drawing_a_triangle/00_Setup/01_Instance.html
 [reading-page]: {% link _tabs/reading.md %}
 [reading-vulkan]: https://www.vulkanprogrammingguide.com
-[reading-cmake]: https://github.com/PacktPublishing/Modern-CMake-for-Cpp
+[reading-cmake]: https://crascit.com/professional-cmake/
 [reading-vcpkg]: https://learn.microsoft.com/en-gb/vcpkg/
 [reading-how-to-vulkan]: https://howtovulkan.com

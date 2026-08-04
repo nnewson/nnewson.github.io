@@ -829,6 +829,10 @@ work rather than extending startup in several directions at once.
 - [How to Vulkan][reading-how-to-vulkan] — a compact, code-first modern Vulkan
   guide whose swapchain and resource sections provide a useful comparison with
   this tutorial's RAII design.
+- [Professional CMake][reading-cmake] — widely regarded as the de facto guide
+  to modern CMake, written by Craig Scott, one of CMake's maintainers. Its
+  target-based approach provides useful context for the imported VMA target and
+  per-target warning policy used here.
 - [Vulkan Memory Allocator][reading-vma] — the library's source, documentation,
   configuration reference, and examples. This is the primary reference for
   the allocator introduced here rather than a book about Vulkan memory in
@@ -856,4 +860,5 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [reading-page]: {% link _tabs/reading.md %}
 [reading-vulkan]: https://www.vulkanprogrammingguide.com
 [reading-how-to-vulkan]: https://howtovulkan.com
+[reading-cmake]: https://crascit.com/professional-cmake/
 [reading-vma]: https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
