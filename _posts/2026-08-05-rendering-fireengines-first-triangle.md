@@ -1313,6 +1313,6 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [vulkan-synchronization2]: <https://docs.vulkan.org/guide/latest/extensions/VK_KHR_synchronization2.html>
 [vulkan-synchronization-examples]: <https://docs.vulkan.org/guide/latest/synchronization_examples.html>
 [vulkan-swapchain-semaphore-reuse]: <https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html>
-[reading-page]: {% link_tabs/reading.md %}
+[reading-page]: {% link _tabs/reading.md %}
 [reading-vulkan]: <https://www.vulkanprogrammingguide.com>
 [reading-how-to-vulkan]: <https://howtovulkan.com>
