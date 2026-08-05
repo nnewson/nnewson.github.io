@@ -1,5 +1,5 @@
 ---
-title: "Rendering fireEngine’s first triangle"
+title: "Rendering fireEngine's first triangle"
 date: 2026-08-05 10:00:00 +0100
 categories: [fireEngine, Development]
 tags: [fireengine, vulkan, rendering, triangle, buffers, synchronization, dynamic-rendering, cpp]
