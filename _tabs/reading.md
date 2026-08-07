@@ -8,6 +8,12 @@ the tools and techniques used while building fireEngine.
 
 ## Books
 
+### [Professional CMake](https://crascit.com/professional-cmake/)
+
+Widely regarded as the de facto guide to modern CMake, written by Craig Scott,
+one of CMake's maintainers. It covers practical, target-based project structure,
+dependency management, testing, packaging, and cross-platform workflows.
+
 ### [Real-Time Rendering](https://www.realtimerendering.com/)
 
 The classic end-to-end reference for real-time rendering systems, connecting
@@ -22,27 +28,15 @@ synchronization, and presentation.
 
 ## Websites
 
-### [How to Vulkan](https://howtovulkan.com)
-
-A compact, code-first tutorial that builds a modern Vulkan 1.3 renderer while
-explaining how its major systems fit together.
-
-### [Your first Slang shader](https://shader-slang.org/docs/first-slang-shader)
-
-The official first step into Slang, covering HLSL-like shader source, entry
-points, command-line compilation, SPIR-V output, and cross-target code
-generation.
-
 ### [GLFW documentation](https://www.glfw.org/docs/latest/)
 
 The official guide to GLFW's cross-platform window, input, event, and Vulkan
 surface APIs, including the lifetime and platform rules behind them.
 
-### [Professional CMake](https://crascit.com/professional-cmake/)
+### [How to Vulkan](https://howtovulkan.com)
 
-Widely regarded as the de facto guide to modern CMake, written by Craig Scott,
-one of CMake's maintainers. It covers practical, target-based project structure,
-dependency management, testing, packaging, and cross-platform workflows.
+A compact, code-first tutorial that builds a modern Vulkan 1.3 renderer while
+explaining how its major systems fit together.
 
 ### [vcpkg documentation](https://learn.microsoft.com/en-gb/vcpkg/)
 
@@ -54,3 +48,9 @@ the tutorial, covering manifests, registries, versioning, and CMake integration.
 AMD's open-source allocation library for Vulkan, with documentation and examples
 covering memory-type selection, suballocation, resource creation, and allocator
 configuration.
+
+### [Your first Slang shader](https://shader-slang.org/docs/first-slang-shader)
+
+The official first step into Slang, covering HLSL-like shader source, entry
+points, command-line compilation, SPIR-V output, and cross-target code
+generation.
