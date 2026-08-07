@@ -1,6 +1,6 @@
 ---
 icon: fas fa-info-circle
-order: 5
+order: 6
 ---
 
 After university, my first job was as a software engineer at

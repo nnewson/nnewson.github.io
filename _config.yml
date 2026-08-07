@@ -26,7 +26,6 @@ social:
 
 avatar: "/assets/img/avatar.jpg"
 social_preview_image: "/assets/img/social-preview.jpg"
-doxygen_url: "https://nnewson.dev/fireEngine-tutorial/"
 
 theme_mode:
 toc: true
