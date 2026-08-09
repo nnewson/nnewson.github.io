@@ -8,6 +8,12 @@ the tools and techniques used while building fireEngine.
 
 ## Books
 
+### [C++ Software Design](https://www.oreilly.com/library/view/c-software-design/9781098113155/)
+
+Klaus Iglberger's guide to managing dependencies and software change in modern
+C++, using design principles and patterns to build flexible, maintainable
+systems without losing sight of practical trade-offs.
+
 ### [Professional CMake](https://crascit.com/professional-cmake/)
 
 Widely regarded as the de facto guide to modern CMake, written by Craig Scott,
@@ -18,7 +24,13 @@ dependency management, testing, packaging, and cross-platform workflows.
 
 The classic end-to-end reference for real-time rendering systems, connecting
 the graphics pipeline and hardware with transforms, shading, effects,
-optimization, and acceleration techniques.
+optimisation, and acceleration techniques.
+
+### [Refactoring](https://martinfowler.com/books/refactoring.html)
+
+Martin Fowler's guide to improving the design of existing code through small,
+behaviour-preserving transformations, supported by tests that keep each change
+safe and observable.
 
 ### [Vulkan Programming Guide](https://www.vulkanprogrammingguide.com)
 
@@ -27,6 +39,11 @@ example-rich guide to the API's core model, including queues, commands, memory,
 synchronization, and presentation.
 
 ## Websites
+
+### [Catch2 tutorial](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)
+
+The official introduction to Catch2, covering test cases, assertions, sections,
+behaviour-driven aliases, and data- and type-driven tests.
 
 ### [GLFW documentation](https://www.glfw.org/docs/latest/)
 
