@@ -306,11 +306,22 @@ explicit.
 
 The relaxed call syntax does not relax format checking. `consteval` requires
 the conversion at compile time, and the stored `std::format_string<Args...>`
-checks the placeholders against the argument types. `std::type_identity_t`
-prevents the format parameter from independently deducing `Args`; the values
-after it establish the types, then the message is checked against them. The
-defaulted `std::source_location` captures the log call for the emergency
-fallback.
+checks the placeholders against the argument types.
+
+The values passed after the message are intended to be the source of truth for
+`Args`. Wrapping the pack in `std::type_identity_t` places its use in the
+message parameter into a non-deduced context, so the format string cannot act
+as a second matcher for those types. This matters because template argument
+deduction does not apply the user-defined conversion from a string literal to
+`LogMessage<Args...>`.
+
+For `log("GLFW error {}: {}", errorCode, description)`, the forwarding-reference
+parameters therefore establish `Args` from `errorCode` and `description` first.
+The compiler then forms the exact `LogMessage<Args...>` type, permits the string
+literal to convert to it, and checks the placeholders against those already
+known argument types. The format string validates the call; it does not decide
+what types the values have. The defaulted `std::source_location` captures the
+log call for the emergency fallback.
 
 The complete implementation is in [`log.hpp`][source-log].
 

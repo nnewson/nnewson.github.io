@@ -14,6 +14,11 @@ Klaus Iglberger's guide to managing dependencies and software change in modern
 C++, using design principles and patterns to build flexible, maintainable
 systems without losing sight of practical trade-offs.
 
+### [Foundations of Game Engine Development, Volume 1: Mathematics](https://foundationsofgameenginedev.com/#fged1)
+
+Eric Lengyel's focused treatment of vectors, matrices, transforms, geometry,
+and the mathematical conventions used to build game engines.
+
 ### [Professional CMake](https://crascit.com/professional-cmake/)
 
 Widely regarded as the de facto guide to modern CMake, written by Craig Scott,
@@ -39,6 +44,12 @@ example-rich guide to the API's core model, including queues, commands, memory,
 synchronization, and presentation.
 
 ## Websites
+
+### [C++ subscript operator](https://en.cppreference.com/w/cpp/language/operators.html#Array_subscript_operator)
+
+The cppreference language reference for overloaded subscripting, including the
+multi-argument `operator[]` syntax added in C++23 and used by fireEngine's
+matrix type.
 
 ### [Catch2 tutorial](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)
 
