@@ -423,8 +423,9 @@ constexpr vk::ApplicationInfo applicationInfo{
 };
 ```
 
-This style makes each field visible at the call site and avoids depending on
-the order of constructor arguments.
+This style names each field at the call site, avoiding the ambiguity of
+positional constructor arguments. C++ still requires the designators to follow
+member declaration order.
 
 ### Attach the Vulkan headers
 
