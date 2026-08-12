@@ -32,29 +32,6 @@ continues to match the published source as fireEngine evolves.
 > first shader and graphics-pipeline milestone.
 {: .prompt-info }
 
-## Choose US English for engine code
-
-Before introducing the new rendering pieces, I want to record a code-style
-decision that will apply from here onwards: fireEngine code will use US English.
-
-That means identifiers, comments, and diagnostics will use spellings such as
-`color`, `synchronize`, and `rasterization`, rather than `colour`,
-`synchronise`, and `rasterisation`. The prose on this site can retain my usual
-UK English, but the source should have one predictable convention.
-
-This is a policy announcement rather than a 0.4 migration. Release 0.3 already
-used US spellings throughout, so no identifiers were renamed here. Recording the
-convention now gives later releases a rule to point at rather than a precedent
-to infer.
-
-Vulkan makes US English the practical choice. Its types, members, flags,
-enumerators, and features already contain names such as
-`VkPipelineColorBlendAttachmentState`,
-`colorWriteMask`, `VkPipelineRasterizationStateCreateInfo`, and
-`synchronization2`. Mirroring that vocabulary avoids code where an engine
-`colour` sits beside a Vulkan `color`, makes searches more reliable, and keeps
-new abstractions visually aligned with the API they wrap.
-
 ## Introducing Slang and the graphics pipeline
 
 Release 0.4 introduces four connected pieces:
@@ -129,6 +106,29 @@ fireEngine-tutorial/
 `triangle.slang` owns the programmable stages. `vertex.hpp` establishes the CPU
 vertex representation that a later buffer will contain. `Pipeline` owns the
 pipeline layout and graphics pipeline that later command buffers will use.
+
+## Choose US English for engine code
+
+Before moving into the build changes, I want to record a code-style decision
+that will apply from here onwards: fireEngine code will use US English.
+
+That means identifiers, comments, and diagnostics will use spellings such as
+`color`, `synchronize`, and `rasterization`, rather than `colour`,
+`synchronise`, and `rasterisation`. The prose on this site can retain my usual
+UK English, but the source should have one predictable convention.
+
+This is a policy announcement rather than a 0.4 migration. Release 0.3 already
+used US spellings throughout, so no identifiers were renamed here. Recording the
+convention now gives later releases a rule to point at rather than a precedent
+to infer.
+
+Vulkan makes US English the practical choice. Its types, members, flags,
+enumerators, and features already contain names such as
+`VkPipelineColorBlendAttachmentState`,
+`colorWriteMask`, `VkPipelineRasterizationStateCreateInfo`, and
+`synchronization2`. Mirroring that vocabulary avoids code where an engine
+`colour` sits beside a Vulkan `color`, makes searches more reliable, and keeps
+new abstractions visually aligned with the API they wrap.
 
 ## Add Slang through vcpkg
 

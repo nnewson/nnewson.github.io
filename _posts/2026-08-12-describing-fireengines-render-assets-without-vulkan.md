@@ -239,29 +239,6 @@ their loading, validation, binding, or rendering contracts.
 
 See [`material.hpp`][source-material].
 
-## Connect one mesh and material as a render object
-
-A mesh is reusable geometry, and a material is reusable appearance.
-[`RenderObject`][source-render-object] connects one of each without owning
-either:
-
-```cpp
-struct RenderObject
-{
-    MeshId mesh;
-    MaterialId material;
-};
-```
-
-That indirection lets several render objects share one mesh with different
-materials, or share one material across different meshes. A scene node will
-instance a `RenderObjectId`, keeping scene hierarchy separate from the catalogue
-that owns geometry and appearance.
-
-The name is intentionally narrower than `SceneNode`. A render object describes
-the reusable mesh/material relationship; it has no parent, children, local
-transform, world transform, or Vulkan state.
-
 ## Prevent unrelated IDs from being mixed
 
 The three ID types have the same representation but different meanings:
@@ -296,6 +273,29 @@ reorder assets, so appending another description leaves existing indices
 unchanged.
 
 See the complete [`render_ids.hpp`][source-render-ids].
+
+## Connect one mesh and material as a render object
+
+A mesh is reusable geometry, and a material is reusable appearance.
+[`RenderObject`][source-render-object] connects one of each without owning
+either:
+
+```cpp
+struct RenderObject
+{
+    MeshId mesh;
+    MaterialId material;
+};
+```
+
+That indirection lets several render objects share one mesh with different
+materials, or share one material across different meshes. A scene node will
+instance a `RenderObjectId`, keeping scene hierarchy separate from the catalogue
+that owns geometry and appearance.
+
+The name is intentionally narrower than `SceneNode`. A render object describes
+the reusable mesh/material relationship; it has no parent, children, local
+transform, world transform, or Vulkan state.
 
 ## Give all render descriptions one owner
 

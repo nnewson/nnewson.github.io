@@ -668,7 +668,7 @@ is verified where a driver exists. Every job that configures the project uses
 derived from `vcpkg.json` and `vcpkg-configuration.json` — the pinned baseline
 doing double duty as a cache identity.
 
-## Diagnosing the likely failures
+## Diagnose the likely failures
 
 ### CMake cannot find the vcpkg toolchain
 
