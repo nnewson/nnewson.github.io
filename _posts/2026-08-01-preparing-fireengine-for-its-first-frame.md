@@ -433,9 +433,16 @@ supports zero images. When a maximum exists, the request is capped to it.
 ### Respect the supported transform and alpha mode
 
 The swapchain adopts `currentTransform`, which requests no rotation or flip
-beyond the transform the surface already reports. For composition with other
-windows, fireEngine walks an ordered list and takes the first mode the surface
-supports:
+beyond the transform the surface already reports.
+
+The [composite-alpha modes][vulkan-composite-alpha] describe how presentation
+interprets the image's alpha channel: opaque ignores it, pre-multiplied expects
+the colour channels to contain alpha already, post-multiplied leaves that
+multiplication to the presentation engine, and inherit follows the native
+window system's behaviour.
+
+For composition with other windows, fireEngine walks an ordered list and takes
+the first mode the surface supports:
 
 ```cpp
 constexpr std::array kPreferredModes = {
@@ -856,6 +863,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [source-main]: https://github.com/nnewson/fireEngine-tutorial/blob/0.3/src/main.cpp
 [source-ci]: https://github.com/nnewson/fireEngine-tutorial/blob/0.3/.github/workflows/ci.yml
 [vulkan-wsi]: https://docs.vulkan.org/spec/latest/chapters/VK_KHR_surface/wsi.html
+[vulkan-composite-alpha]: https://docs.vulkan.org/refpages/latest/refpages/source/VkCompositeAlphaFlagBitsKHR.html
 [vma-configuration]: https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/configuration.html
 [reading-page]: {% link _tabs/reading.md %}
 [reading-vulkan]: https://www.vulkanprogrammingguide.com

@@ -19,6 +19,12 @@ systems without losing sight of practical trade-offs.
 Eric Lengyel's focused treatment of vectors, matrices, transforms, geometry,
 and the mathematical conventions used to build game engines.
 
+### [Game Engine Architecture](https://www.gameenginebook.com/)
+
+Jason Gregory's broad guide to building game engines, including resource
+management, runtime architecture, rendering, animation, gameplay systems, and
+the engineering trade-offs that connect them.
+
 ### [Professional CMake](https://crascit.com/professional-cmake/)
 
 Widely regarded as the de facto guide to modern CMake, written by Craig Scott,
