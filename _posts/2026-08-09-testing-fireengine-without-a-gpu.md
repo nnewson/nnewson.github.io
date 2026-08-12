@@ -404,6 +404,34 @@ and shuts down safely. A unit suite cannot prove those components agree at
 runtime, so retaining this test prevents architectural cleanup from weakening
 the end-to-end contract established by release 0.6.
 
+## Document internal test seams honestly
+
+Moving a helper into a header makes it reachable, but it does not automatically
+make it supported public API. Release 0.7 marks the `detail` declarations and
+implementation-only regions with Doxygen's `INTERNAL` conditional section.
+
+The normal [`Doxyfile`][source-doxyfile] remains the public API view. A second
+[`Doxyfile.internal`][source-doxyfile-internal] includes those settings, changes
+the project identity and output folder, and enables the internal section:
+
+```text
+@INCLUDE_PATH          = docs
+@INCLUDE               = Doxyfile
+
+PROJECT_NAME           = "Fire Engine Tutorial — Internal Implementation"
+PROJECT_BRIEF          = "The implementation details behind the tutorial renderer"
+OUTPUT_DIRECTORY       = build/docs-internal
+ENABLED_SECTIONS       = INTERNAL
+```
+
+CI builds both views and places the internal site under `internals/` in the
+published documentation artefact. Readers can inspect why the engine makes a
+choice without mistaking a test seam for a stable application-facing contract.
+
+This is a useful distinction for a tutorial. Hiding every implementation detail
+would make the design harder to study; presenting every implementation detail
+as public API would make future refactoring needlessly expensive.
+
 ## Configure, build, and run release 0.7
 
 The compiler, build-tool, vcpkg, and Vulkan prerequisites remain the same as in
@@ -470,34 +498,6 @@ ctest --preset default -E fireEngineTutorialSmoke
 
 That command is also useful while changing one CPU-side contract: the feedback
 does not need to wait for window and driver startup.
-
-## Document internal test seams honestly
-
-Moving a helper into a header makes it reachable, but it does not automatically
-make it supported public API. Release 0.7 marks the `detail` declarations and
-implementation-only regions with Doxygen's `INTERNAL` conditional section.
-
-The normal [`Doxyfile`][source-doxyfile] remains the public API view. A second
-[`Doxyfile.internal`][source-doxyfile-internal] includes those settings, changes
-the project identity and output folder, and enables the internal section:
-
-```text
-@INCLUDE_PATH          = docs
-@INCLUDE               = Doxyfile
-
-PROJECT_NAME           = "Fire Engine Tutorial — Internal Implementation"
-PROJECT_BRIEF          = "The implementation details behind the tutorial renderer"
-OUTPUT_DIRECTORY       = build/docs-internal
-ENABLED_SECTIONS       = INTERNAL
-```
-
-CI builds both views and places the internal site under `internals/` in the
-published documentation artefact. Readers can inspect why the engine makes a
-choice without mistaking a test seam for a stable application-facing contract.
-
-This is a useful distinction for a tutorial. Hiding every implementation detail
-would make the design harder to study; presenting every implementation detail
-as public API would make future refactoring needlessly expensive.
 
 ## Extend continuous integration without overstating it
 
