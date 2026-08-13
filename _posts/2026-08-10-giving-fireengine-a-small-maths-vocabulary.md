@@ -513,10 +513,8 @@ local transform:
 
 ```cpp
 fire_engine::SceneNode& node = content.scene.addRoot("Tutorial triangle");
-node.localTransform(
-    fire_engine::Mat4::translation({.x = 0.12f, .y = 0.0f, .z = 0.0f}) *
-    fire_engine::Mat4::scale({.x = 0.9f, .y = 0.9f, .z = 1.0f})
-);
+node.localTransform(fire_engine::Mat4::translation({.x = 0.12f, .y = 0.0f, .z = 0.0f}) *
+                    fire_engine::Mat4::scale({.x = 0.9f, .y = 0.9f, .z = 1.0f}));
 node.renderObject(triangle);
 ```
 

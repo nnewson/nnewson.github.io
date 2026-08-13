@@ -59,16 +59,28 @@ Release 0.5 introduces five connected concepts:
   single slot, so the CPU will eventually wait for every frame before reusing
   it. More slots can later allow CPU and GPU work to overlap.
 
+Once submission arrives in the next release, the three synchronization objects
+will gate different actors:
+
+| Object | Blocks | Until |
+| --- | --- | --- |
+| Frame-finished fence | The CPU, before it reuses this frame slot | The GPU has finished the slot's previous submission |
+| Image-available semaphore | Graphics, before it writes into the acquired image | The presentation engine has released that image |
+| Render-finished semaphore | Presentation, before it displays the image | Graphics has finished rendering into it |
+
+Waiting for the fence prevents the CPU from recycling this frame slot's state
+while the GPU may still be using it. Once the previous GPU submission signals
+the fence, the CPU can prepare the next graphics submission with that slot.
+
+The mechanisms are not interchangeable. The host waits on the fence, while
+acquisition, graphics, and presentation use the binary semaphores to order
+device work. A fence cannot replace those semaphores, and the frame loop cannot
+use a binary semaphore as its host-visible completion signal.
+
 The class is named `FrameInFlight` even though this checkpoint never submits
 its command buffer. The name describes the lifetime the owner is preparing:
 once submission arrives, everything inside it will remain reserved until its
 fence says that frame has finished.
-
-Semaphores and fences are both synchronization objects, but they solve
-different boundaries. The GPU waits on and signals the binary semaphores used
-here. The CPU waits on and resets the fence. A fence cannot replace the
-semaphores that order acquisition and presentation, and a binary semaphore
-cannot be polled by this frame loop as a substitute for its fence.
 
 ## Separate frame state from image state
 
