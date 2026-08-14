@@ -67,6 +67,12 @@ behaviour-driven aliases, and data- and type-driven tests.
 The official guide to GLFW's cross-platform window, input, event, and Vulkan
 surface APIs, including the lifetime and platform rules behind them.
 
+### [glTF 2.0 specification: Scenes and Nodes](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes-and-nodes)
+
+The Khronos definition of scenes, ordered root nodes, child hierarchies, and
+local transforms in glTF 2.0, providing a concrete interchange model for
+scene-graph ownership and traversal.
+
 ### [How to Vulkan](https://howtovulkan.com)
 
 A compact, code-first tutorial that builds a modern Vulkan 1.3 renderer while
