@@ -158,8 +158,9 @@ explicitly rather than changing the meaning of the type's default state.
 ## Move vertices out of the Vulkan renderer
 
 Release 0.6 stored its vertex type under `render/`. Position was a raw array of
-two floats already in clip space, and colour was a raw array of three floats.
-That was enough for a fixed two-dimensional triangle.
+two floats chosen as the triangle's final normalized-device x/y coordinates,
+and colour was a raw array of three floats. That was enough for a fixed
+two-dimensional triangle.
 
 Release 0.7 moves [`Vertex`][source-vertex] into the Vulkan-free graphics layer:
 
@@ -174,8 +175,8 @@ struct Vertex
 Position is now three-dimensional and explicitly object-space. The scene's
 model matrix will decide where the object appears, and the frame's
 view-projection matrix will eventually decide how world space reaches the
-screen. The vertex description no longer assumes that application content has
-already been converted to clip space.
+screen. The vertex description no longer assumes that application content
+already contains final normalized-device positions.
 
 Colour grows from RGB to RGBA. Alpha does not participate in blending in release
 0.7—the pipeline has blending disabled and the current data remains opaque—but
