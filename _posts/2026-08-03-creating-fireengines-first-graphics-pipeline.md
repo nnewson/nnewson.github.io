@@ -364,9 +364,13 @@ different interface from vertex-buffer locations.
 
 The `POSITION` and `COLOR` suffixes are user-defined HLSL-style semantics.
 `SV_Position` is different: it is a system-value semantic telling the
-rasteriser that this four-component output is the clip-space position. Keeping
-matching stage values aligned in type, order, semantic, and explicit location
-makes the interface clear to both Slang and Vulkan.
+rasteriser that this four-component output is the clip-space position. Before
+rasterisation, Vulkan divides its x, y, and z components by w to produce
+normalized device coordinates: x and y span -1 to +1, while z spans 0 to 1. A
+viewport later maps those normalized values into framebuffer coordinates.
+
+Keeping matching stage values aligned in type, order, semantic, and explicit
+location makes the interface clear to both Slang and Vulkan.
 
 ### Transform each vertex
 

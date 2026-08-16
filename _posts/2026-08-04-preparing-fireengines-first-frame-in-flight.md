@@ -75,7 +75,7 @@ the fence, the CPU can prepare the next graphics submission with that slot.
 The mechanisms are not interchangeable. The host waits on the fence, while
 acquisition, graphics, and presentation use the binary semaphores to order
 device work. A fence cannot replace those semaphores, and the frame loop cannot
-use a binary semaphore as its host-visible completion signal.
+use a binary semaphore as its CPU-side completion signal.
 
 The class is named `FrameInFlight` even though this checkpoint never submits
 its command buffer. The name describes the lifetime the owner is preparing:
