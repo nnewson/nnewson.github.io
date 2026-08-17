@@ -62,11 +62,11 @@ The first post will separate the reusable engine code from the small
 application that owns `main()` and the event loop. That creates a natural place
 for fast unit tests alongside the existing one-frame Vulkan smoke test.
 
-Catch2 will exercise maths, asset validation, scene traversal, render planning,
-and other CPU-side decisions without opening a window or creating a Vulkan
-device. Small Vulkan-independent choices currently buried in implementation
-files will also move behind focused internal interfaces and receive direct
-tests.
+[Catch2](https://catch2.org) will exercise maths, asset validation, scene
+traversal, render planning, and other CPU-side decisions without opening a
+window or creating a Vulkan device. Small Vulkan-independent choices currently
+buried in implementation files will also move behind focused internal
+interfaces and receive direct tests.
 
 This is useful groundwork rather than testing for its own sake. Every later
 part of the refactor introduces rules about transforms, identifiers,

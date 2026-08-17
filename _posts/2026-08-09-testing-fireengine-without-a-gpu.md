@@ -21,9 +21,9 @@ formats should not depend on whichever surface and driver happen to be present
 on the test machine.
 
 Release 0.7 therefore separates the engine from its executable and adds a
-Catch2 test target. Twenty-four test cases now exercise CPU-side behaviour
-without creating a Vulkan device, while the original rendered-frame test stays
-in place as the twenty-fifth CTest entry.
+[Catch2](https://catch2.org) test target. Twenty-four test cases now exercise
+CPU-side behaviour without creating a Vulkan device, while the original
+rendered-frame test stays in place as the twenty-fifth CTest entry.
 
 This is the first of several posts based on the same 0.7 source. The release
 also introduces maths, render assets, a scene graph, render preparation, and a
