@@ -55,6 +55,12 @@ Release 0.6 introduces six connected pieces:
 - **[Synchronization 2][vulkan-synchronization2]** gives image barriers and
   queue submission explicit stage and access scopes.
 
+Traditional Vulkan rendering uses a render-pass object to describe attachment
+use and a `VkFramebuffer` object to associate specific attachment image views
+with that description. These objects remain supported and useful. They are
+different from GLFW's framebuffer size, which is simply the drawable window
+size in pixels.
+
 The vertex buffer and uniform buffer solve different shader inputs. The vertex
 buffer is an array: three `Vertex` values are fetched once per vertex. The
 uniform buffer is shared draw state: one `FrameUniforms` value supplies the
@@ -270,9 +276,10 @@ The bounds check uses subtraction only after proving that `offset` is inside
 the allocation, avoiding overflow in an `offset + byteCount` comparison. An
 empty write is a valid no-op.
 
-`vmaCopyMemoryToAllocation()` temporarily maps the allocation, copies the
-bytes, and performs any flush required for non-coherent host-visible memory.
-The caller does not need to assume that all mapped host memory is coherent.
+Host-coherent memory makes CPU writes visible to the device without an explicit
+cache flush. Other host-visible memory requires a flush before the GPU can
+reliably read those writes. `vmaCopyMemoryToAllocation()` temporarily maps the
+allocation, copies the bytes, and handles that distinction for the caller.
 
 Both release 0.6 uploads happen during construction, before any queue
 submission can read the buffers. Future per-frame animation can reuse the same
@@ -280,8 +287,7 @@ method after waiting for that frame slot's fence.
 
 ## Upload three vertices once
 
-The renderer defines a counter-clockwise triangle in normalized device
-coordinates:
+The renderer defines a triangle directly in normalized device coordinates:
 
 ```cpp
 constexpr std::array kTriangleVertices = {
@@ -294,10 +300,17 @@ constexpr std::array kTriangleVertices = {
 };
 ```
 
-`Pipeline` already uses the same `Vertex` type to define the binding stride and
-attribute offsets. The C++ values therefore match the shader's location-zero
-`float2` position and location-one `float3` colour without a second layout
-description drifting away from the data.
+With the positive viewport height used later, negative Y appears towards the
+top of the framebuffer and positive Y towards the bottom, so the first vertex
+forms the triangle's upper point. Culling remains disabled, so this release does
+not depend on a front-face winding convention.
+
+`Renderer` uploads values of the same `Vertex` type that `Pipeline` uses to
+calculate the binding stride and attribute offsets. That shared type keeps the
+uploaded byte layout and those calculations tied together. The Vulkan formats
+and locations are still stated separately, so they must be kept in agreement
+with the shader's location-zero `float2` position and location-one `float3`
+colour.
 
 `Renderer` creates and populates the vertex buffer in its constructor:
 
@@ -366,9 +379,10 @@ FrameInFlight::FrameInFlight(const Device& device,
 }
 ```
 
-Identity leaves the clip-space positions unchanged. It is also identical in
-row-major and column-major notation, but grouping the initializer by columns
-documents the layout expected by Slang.
+Identity leaves the clip-space positions unchanged. Its values look the same in
+row-major and column-major order, so this initializer cannot establish the
+matrix convention by itself. The `-matrix-layout-column-major` option in
+[`CMakeLists.txt`][source-cmake] makes Slang's expected layout explicit.
 
 The buffer follows the frame slot because its contents may eventually change
 every frame. With multiple frames in flight, each slot can update its own
@@ -410,8 +424,8 @@ private:
 
 `main()` retains the platform event loop and high-level policy. `Renderer`
 handles the Vulkan sequence for one frame. This keeps window-close behaviour,
-automation limits, and swapchain-recreation policy out of the command-recording
-implementation.
+the `--frames` limit used by the automated smoke test, and
+swapchain-recreation policy out of the command-recording implementation.
 
 The class is immovable because its borrowed references and owned resources form
 one stable lifetime. A later multi-frame renderer can extend its frame storage
@@ -449,6 +463,19 @@ slots without changing the per-image presentation semaphores.
 
 ## Acquire an image before resetting the fence
 
+Surface conditions can change while a swapchain is in use. The most familiar
+cause is resizing the window, although the exact response is platform
+dependent. Moving the window to a display with a different scale factor, or a
+change in the display's resolution, orientation, or colour space, can have the
+same effect.
+
+Vulkan reports a swapchain as **suboptimal** when it can still provide and
+present images but no longer matches the surface as well as possible. It
+reports the swapchain as **out of date** when the surface has changed enough
+that the operation cannot continue with those images. Both conditions mean the
+swapchain should eventually be replaced, but only the suboptimal path still
+produces a usable frame.
+
 The renderer next asks the swapchain for an available image, using the frame's
 binary semaphore for the device-side signal:
 
@@ -471,10 +498,15 @@ catch (const vk::OutOfDateKHRError&)
 }
 ```
 
-An infinite timeout waits until an image can be returned. Success provides its
-index and signals `imageAvailable`. A suboptimal result still provides a usable
-image, so the renderer remembers the condition and continues. An out-of-date
-swapchain provides no image to render and returns immediately.
+The infinite timeout may block this host call until an image can be returned.
+Success provides its index and arranges for `imageAvailable` to be signaled;
+the later graphics submission waits on that device-side signal before using
+the image. A signal records that a prerequisite has completed, while a wait
+prevents dependent work from passing until that signal exists.
+
+A suboptimal result still provides a usable image, so the renderer remembers
+the condition and continues. An out-of-date swapchain provides no image to
+render and returns immediately.
 
 The fence is still signaled at this point. That ordering is deliberate. If it
 had been reset before acquisition and the out-of-date path returned, no queue
@@ -523,9 +555,22 @@ buffer from the previous frame.
 
 ## Transition the image into attachment layout
 
-An acquired swapchain image is not automatically in the layout required for
-colour writes. The first `vk::ImageMemoryBarrier2` describes both the layout
-transition and the access that follows:
+Acquiring an image identifies which swapchain image this frame may use, but it
+does not put that image into the layout required for rendering. Vulkan images
+have layouts associated with different kinds of access. An image barrier can
+order those accesses and transition an image from one layout to another.
+
+Each side of the barrier has a stage mask and an access mask. The stage
+identifies where in the graphics pipeline the dependency applies; the access
+mask identifies the kind of memory operation involved. The source pair
+describes earlier work, while the destination pair describes the later work
+that must wait and the access it will perform.
+
+Before rendering can begin, two conditions must be satisfied. The
+`imageAvailable` semaphore handles the presentation-to-graphics handoff. The
+first `vk::ImageMemoryBarrier2` then transitions the acquired image into the
+layout required for colour-attachment writes and describes the access that
+follows:
 
 ```cpp
 const vk::ImageMemoryBarrier2 toAttachment{
@@ -545,14 +590,13 @@ const vk::ImageMemoryBarrier2 toAttachment{
 };
 ```
 
-`eUndefined` deliberately discards any previous presentation contents. Every
-frame clears the entire attachment, so preserving old pixels would add a
-dependency with no visible benefit. `eAttachmentOptimal` gives Vulkan the
-layout needed for dynamic colour-attachment access.
+This frame does not need the image's previous pixels, so `eUndefined` discards
+them and leaves no earlier image access to preserve. The barrier transitions
+the image to `eAttachmentOptimal` and identifies colour-attachment writes as
+its first graphics access. After the barrier, dynamic rendering can use the
+corresponding image view as a colour attachment.
 
-There is no source access to preserve. The destination stage and access mask
-identify the first real use: colour-attachment output writes. The subresource
-range covers the image's sole colour mip level and array layer.
+The subresource range covers the image's sole colour mip level and array layer.
 
 Both queue-family indices are ignored. If graphics and presentation use
 different families, the swapchain was created with concurrent sharing; if they
@@ -581,6 +625,10 @@ transition.
 
 ## Describe one dynamic-rendering colour attachment
 
+An attachment is the image view that a rendering operation reads, writes,
+resolves, clears, or preserves. Release 0.6 uses the view associated with the
+acquired swapchain image.
+
 Release 0.4 created a pipeline compatible with the swapchain format. Release
 0.6 supplies the acquired image view as its actual attachment:
 
@@ -599,14 +647,13 @@ const vk::RenderingAttachmentInfo colorAttachment{
 };
 ```
 
-An attachment is the image view a rendering operation reads, writes, resolves,
-clears, or preserves. This one is selected by the acquired image index. Its
-load operation clears every pixel to a dark opaque colour instead of loading
-old contents. Its store operation preserves the triangle and background for
-presentation after rendering ends.
+The load operation clears every pixel to a dark opaque colour instead of
+loading old contents. The store operation preserves the triangle and
+background for presentation after rendering ends.
 
-`vk::RenderingInfo` defines the area and attachment list that a traditional
-render pass and framebuffer would otherwise help describe:
+Because fireEngine uses dynamic rendering, it does not create render-pass or
+framebuffer objects for this path. `vk::RenderingInfo` instead supplies the
+render area and attachment list directly while recording the command buffer:
 
 ```cpp
 const vk::RenderingInfo renderingInfo{
@@ -647,10 +694,10 @@ commandBuffer.setViewport(0, viewport);
 commandBuffer.setScissor(0, scissor);
 ```
 
-The viewport maps normalized device coordinates into framebuffer coordinates
-and maps depth into the full zero-to-one range. The scissor discards fragments
-outside its integer rectangle. Both cover the complete current swapchain
-extent.
+The viewport maps normalized device coordinates into framebuffer
+coordinates—the pixel coordinate system of the current render target—and maps
+depth into the full zero-to-one range. The scissor discards fragments outside
+its integer rectangle. Both cover the complete current swapchain extent.
 
 Keeping these values dynamic avoids creating a new graphics pipeline merely
 because the presentation extent changes. Swapchain recreation still needs to
@@ -819,10 +866,11 @@ device_.graphicsQueue().submit2(
     *frame_.frameFinished());
 ```
 
-The wait stage is colour-attachment output because that is where the acquired
-swapchain image is first touched. Earlier independent stages do not need to
-stall for presentation ownership, but the layout transition and colour writes
-cannot pass the acquisition semaphore.
+`imageAvailable` is the acquisition-to-graphics handoff. The submission may be
+queued immediately, but it cannot reach colour-attachment output—the first
+stage that uses the acquired image—until that semaphore is signaled. The layout
+transition and colour writes therefore wait, while unrelated earlier stages do
+not have to stall.
 
 The signal uses the same stage so the per-image `renderFinished` semaphore is
 not signaled before the colour output and transition to presentation layout
@@ -832,6 +880,14 @@ The fence is separate from both semaphores. It tells the CPU when the submitted
 graphics work has completed so the frame slot can be recycled. It does not tell
 the CPU when the later presentation operation has released its semaphore or
 swapchain resources.
+
+The complete handoff is:
+
+```text
+acquisition -> imageAvailable -> graphics submission
+graphics submission -> renderFinished -> presentation
+graphics submission completion -> frameFinished fence -> CPU slot reuse
+```
 
 `submit2()` is the queue-submission half of Synchronization 2. Its semaphore
 stage masks live beside the semaphore handles instead of in a parallel array,
@@ -849,8 +905,9 @@ queue is not necessarily where graphics commands should be submitted.
 to the same family and even the same queue handle, as they do in the captured
 Apple M2 Pro run, but the renderer does not assume that they will:
 
-- `graphicsQueue().submit2()` executes the command buffer and signals the frame
-  fence plus the acquired image's render-finished semaphore;
+- `graphicsQueue().submit2()` waits on the frame's image-available semaphore,
+  executes the command buffer, signals the acquired image's render-finished
+  semaphore, and associates completion with the frame fence;
 - `presentQueue().presentKHR()` submits a presentation request that waits for
   that render-finished semaphore.
 
@@ -897,10 +954,15 @@ enum class RenderResult : std::uint8_t
 };
 ```
 
-A clean result means one image was presented and the swapchain remains
-suitable. A suboptimal result still means an image was presented, but surface
-conditions suggest replacing the swapchain. An out-of-date result means the
-attempt did not produce a presented frame.
+Three values exist because `main()` needs two independent answers from one
+call: whether a frame reached the screen and whether the loop should continue.
+`ePresented` answers yes to both. `eNotPresented` answers no to both: in release
+0.6 it maps an out-of-date result from either acquisition or presentation, so
+nothing is counted and the loop stops. `ePresentedSuboptimal` is the case where
+the answers differ: the image was shown and counts towards the `--frames`
+limit, but the swapchain should be replaced and the loop stops. A Boolean could
+not represent that middle case, which is why the renderer returns an
+enumeration.
 
 Presentation can report the latter two conditions independently of acquisition:
 
@@ -924,13 +986,12 @@ return swapchainIsSuboptimal
     : RenderResult::ePresented;
 ```
 
-This distinction matters for frame accounting. A suboptimal image was still
-successfully shown and should count. An out-of-date attempt should not.
-
-Swapchain recreation remains outside 0.6. Either non-clean result asks the
-application to stop after performing its shutdown wait. A later checkpoint can
-replace the old swapchain, per-image semaphores, and format-dependent pipeline
-without obscuring the first complete render loop.
+Release 0.6 reports both surface-change outcomes to `main()` instead of
+recreating the swapchain. A suboptimal result still counts as a presented frame
+before the loop stops; an out-of-date result does not. The application then
+performs its shutdown wait and exits cleanly. A later checkpoint can replace
+the old swapchain, per-image semaphores, and format-dependent pipeline without
+obscuring the first complete render loop.
 
 ## Keep the renderer exception-safe after submission
 
@@ -1004,8 +1065,8 @@ GLFW's event queue is process-wide, but keeping the call on `Window` prevents
 the C API and native handle from leaking into application code.
 
 `main()` creates `Renderer` last so it is destroyed first, then runs until the
-window closes, the requested automation limit is reached, or the swapchain
-needs replacement:
+window closes, the `--frames` limit used by the automated smoke test is reached,
+or the swapchain needs replacement:
 
 ```cpp
 std::uint64_t renderedFrameCount = 0;
@@ -1168,9 +1229,9 @@ are relationships between otherwise valid handles.
 
 `AllocatedBuffer` names whether VMA failed during creation or upload and
 includes the Vulkan result. Creation failures point to the requested size,
-usage, host-access constraints, allocation pressure, or driver state. An upload
-range error is caught before VMA and means the byte span or offset does not fit
-the allocation.
+usage, host-access constraints, insufficient suitable memory, or driver state.
+An upload range error is caught before VMA and means the byte span or offset
+does not fit the allocation.
 
 ### The first frame waits forever
 
