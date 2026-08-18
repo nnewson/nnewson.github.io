@@ -391,10 +391,7 @@ The existing bounded application test is renamed from `fireEngineTutorial` to
 `fireEngineTutorialSmoke`, making its scope visible next to the new unit cases:
 
 ```cmake
-add_test(
-    NAME fireEngineTutorialSmoke
-    COMMAND fireEngineTutorial --frames 1
-)
+add_test(NAME fireEngineTutorialSmoke COMMAND fireEngineTutorial --frames 1)
 set_tests_properties(fireEngineTutorialSmoke PROPERTIES TIMEOUT 30)
 ```
 
