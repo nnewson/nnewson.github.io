@@ -230,8 +230,10 @@ struct Material
 ```
 
 Opaque white is the identity for component-wise colour multiplication, so a
-default material leaves vertex colours unchanged. The tutorial material uses a
-slightly blue-white factor to prove that material data reaches each draw.
+default material leaves vertex colours unchanged. Release 0.7 also gives the
+tutorial material a specific colour, shown later when the application constructs
+the triangle. That makes the material contribution visible instead of leaving
+the identity factor in place.
 
 There are no textures, samplers, normals, metallic or roughness factors,
 lighting models, or pipeline variants yet. Adding those fields before a shader
@@ -514,8 +516,10 @@ struct VertexInput
 ```
 
 The maths post covered the model and view-projection transform chain. The asset
-contribution is the data on either side of it: object-space position, vertex
-colour, and material base colour.
+layer supplies the values consumed by this shader path: each vertex provides
+its object-space position and colour, while the selected material provides the
+base-colour multiplier. Scene and frame data supply the transforms applied
+between object space and clip space.
 
 The vertex stage multiplies the two colours before interpolation:
 

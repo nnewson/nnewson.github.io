@@ -197,8 +197,16 @@ operations allocates memory or has an exceptional failure mode.
 Matrix notation normally names an element by row and then column. The storage
 layout answers a different question: which element appears next in memory?
 
-fireEngine keeps the familiar logical access order while storing complete
-columns contiguously:
+fireEngine chooses column-major storage to keep its representation aligned with
+the column-vector convention common in graphics texts. Matrices multiply column
+vectors written on their right, so composition is evaluated from right to left:
+in `translation * scale * position`, scale acts first. Row-major storage could
+implement the same algebra, and Slang supports either layout; fireEngine
+configures Slang to match the engine's column-major choice so matrices can cross
+the shader boundary unchanged.
+
+The class keeps the familiar logical access order while storing complete columns
+contiguously:
 
 ```cpp
 [[nodiscard]] constexpr float operator[](std::size_t rowIndex,
@@ -387,9 +395,9 @@ check: it fixes the convention that later scene traversal will use.
 
 ## Resolve parent and local transforms consistently
 
-The first scene graph stores an identity local transform and an identity world
-transform on every new node. Resolving a node composes them in the same order as
-the test:
+The [first scene graph][scene-post] stores an identity local transform and an
+identity world transform on every new node. Resolving a node composes them in
+the same order as the test:
 
 ```cpp
 void SceneNode::resolve(const Mat4& parentWorld) noexcept
@@ -406,9 +414,10 @@ The local transform is applied first, positioning the node relative to its
 parent. The already-resolved parent transform then carries that result into
 world space. A deeper hierarchy repeats the same rule from the roots downwards.
 
-The next scene-graph post will examine ownership and traversal. For this maths
-layer, the important point is that the composition convention has one
-implementation and one device-free test before hierarchy depends on it.
+The [next scene-graph post][scene-post] examines ownership and traversal in more
+detail. For this maths layer, the important point is that the composition
+convention has one implementation and one device-free test before hierarchy
+depends on it.
 
 ## Match the CPU and shader layouts
 
@@ -670,6 +679,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [release-0-6]: {{ page.previous_release_url }}
 [release-0-7]: {{ page.release_url }}
 [testing-post]: {% post_url 2026-08-09-testing-fireengine-without-a-gpu %}
+[scene-post]: {% post_url 2026-08-14-building-fireengines-first-scene-graph %}
 [source-cmake]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/CMakeLists.txt>
 [source-vec3]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/math/vec3.hpp>
 [source-vec4]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/math/vec4.hpp>
