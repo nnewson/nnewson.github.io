@@ -160,13 +160,11 @@ indices. The renderer can therefore build lookup tables addressed by the same
 IDs already carried by draw items. Unused catalogue entries remain absent from
 the plan, but required entries keep their original identity.
 
-`assetRevision` and `dependencyHash` record the summarised input used when the
-cached plan was compiled, but `build()` consumes them differently.
-`dependencyHash` is the cheap half of the cache key, checked beside the exact
-dependency vector. `assetRevision` is never read back: validation identity
-lives in `RenderPreparation`'s own state. That is why a call can validate a
-newer revision and then throw on a bad scene reference, leaving a retained plan
-whose `assetRevision` trails the catalogue.
+`dependencyHash` participates in cache lookup beside the exact dependency
+sequence. `assetRevision` records the catalogue revision represented by a
+successfully compiled plan. The
+[selection section](#select-distinct-resources-in-stable-id-order) shows where
+both values are attached to the completed plan.
 
 See the complete
 [`render_preparation.hpp`][source-render-preparation-header].
@@ -241,9 +239,11 @@ if (!assetsChanged && cachedPlan_.has_value() &&
 }
 ```
 
-The hash cheaply rejects most changed lists before vector comparison. The exact
-IDs then protect correctness when two sequences share a hash. Retaining both is
-more deliberate than treating the hash as proof of equality.
+`currentDependencies` is extracted once because both the cache check and the
+miss path need it. When the hashes differ, short-circuit evaluation avoids the
+element-by-element vector comparison. When they match, the exact ID sequence
+remains authoritative. Retaining both is more deliberate than treating the
+hash as proof of equality.
 
 Order and repetition remain part of the key:
 
@@ -285,9 +285,9 @@ for (const RenderObjectId renderObject : currentDependencies)
 }
 ```
 
-The validity check catches the default sentinel. The range check catches a
-manually constructed ID or one originating in another collection. Both happen
-before the value indexes `renderObjects()`.
+The validity check catches the default sentinel. The range check prevents an
+out-of-bounds index before the value indexes `renderObjects()`; any in-range
+value is treated as an index into the supplied catalogue.
 
 An empty draw list is valid. It produces an empty selected subset after the
 catalogue passes validation. A non-empty list, however, must resolve every
@@ -478,12 +478,25 @@ const auto& reusedPlan = preparation.build(assets, movedDrawList);
 REQUIRE(movedDrawList.dependencyHash == firstDrawList.dependencyHash);
 REQUIRE(&reusedPlan == &firstPlan);
 REQUIRE(preparation.generation() == 1);
+
+SceneNode& second = scene.addRoot("second triangle");
+second.renderObject(object);
+auto expandedDrawList = scene.buildDrawItems();
+// Simulate a hash collision: the exact dependency sequence must still
+// distinguish one instance from two.
+expandedDrawList.dependencyHash = firstDrawList.dependencyHash;
+static_cast<void>(preparation.build(assets, expandedDrawList));
+REQUIRE(preparation.generation() == 2);
+
+static_cast<void>(assets.addMaterial(Material{}));
+static_cast<void>(preparation.build(assets, expandedDrawList));
+REQUIRE(preparation.generation() == 3);
 ```
 
-It then adds a second instance and deliberately overwrites the expanded draw
-list's hash with the old value. The exact dependency vector still detects the
-change and advances the generation to two. Adding an otherwise unused material
-advances the asset revision and generation to three.
+The forced hash value simulates a collision between the one- and two-instance
+sequences. The exact dependency vector still detects the change and advances
+the generation to two. Adding an otherwise unused material then advances the
+asset revision and generation to three.
 
 That collision simulation is important. A test that only compared naturally
 different hashes would prove the fast path, but not the correctness fallback.
