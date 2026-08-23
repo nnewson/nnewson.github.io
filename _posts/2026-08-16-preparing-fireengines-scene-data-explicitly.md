@@ -60,8 +60,8 @@ RenderAssets ------------------------+
   collection identity and revision   v
                               RenderPreparation
 SceneDrawList --------------------->  validate + select + cache
-  ordered RenderObjectIds             |
-  dependency hash                     v
+  ordered RenderObjectIds            |
+  dependency hash                    v
                               RenderPreparationPlan
                                 distinct MeshIds
                                 distinct MaterialIds
