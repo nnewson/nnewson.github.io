@@ -1,6 +1,6 @@
 ---
 icon: fas fa-book
-order: 4
+order: 5
 ---
 
 A small collection of books and websites that provide useful background for
@@ -63,6 +63,11 @@ The cppreference language reference for overloaded subscripting, including the
 multi-argument `operator[]` syntax added in C++23 and used by fireEngine's
 matrix type.
 
+### [C++ `std::variant`](https://en.cppreference.com/w/cpp/utility/variant.html)
+
+The cppreference language-library entry for the type-safe discriminated union
+used to give a scene node one explicit component role.
+
 ### [Catch2 tutorial](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)
 
 The official introduction to Catch2, covering test cases, assertions, sections,
@@ -73,11 +78,21 @@ behaviour-driven aliases, and data- and type-driven tests.
 The official guide to GLFW's cross-platform window, input, event, and Vulkan
 surface APIs, including the lifetime and platform rules behind them.
 
+### [glTF 2.0 specification: Animations](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#animations)
+
+The Khronos definition of animation samplers, channels, target nodes and paths,
+input timestamps, output values, and supported interpolation modes.
+
 ### [glTF 2.0 specification: Scenes and Nodes](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes-and-nodes)
 
 The Khronos definition of scenes, ordered root nodes, child hierarchies, and
 local transforms in glTF 2.0, providing a concrete interchange model for
 scene-graph ownership and traversal.
+
+### [glTF 2.0 specification: Textures](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#textures)
+
+The Khronos definitions of images, samplers, textures, and texture coordinates
+used to describe sampled surface colour.
 
 ### [How to Vulkan](https://howtovulkan.com)
 

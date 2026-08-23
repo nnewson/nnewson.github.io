@@ -725,9 +725,9 @@ path will depend on:
   TRS source representation.
 
 No image, texture, sampler, animation clip, or loader exists at this checkpoint.
-The next 0.8 step can now extend Vulkan-free asset descriptions and define
-animation data using `Vec2`, `Quaternion`, `Transform`, and `SceneNodeId` without
-inventing those contracts inside the renderer or importer.
+The [next 0.8 step][descriptions-post] extends Vulkan-free asset descriptions
+and defines animation data using `Vec2`, `Quaternion`, `Transform`, and
+`SceneNodeId` without inventing those contracts inside the renderer or importer.
 
 ## Recommended reading
 
@@ -750,6 +750,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [release-0-8]: {{ page.release_url }}
 [source-commit]: {{ page.source_commit_url }}
 [planning-post]: {% post_url 2026-08-20-growing-fireengine-into-an-animated-gltf-renderer %}
+[descriptions-post]: {% post_url 2026-08-23-extending-fireengines-descriptions-without-introducing-vulkan %}
 [source-normalize-error]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/normalize_error.hpp>
 [source-quaternion]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/quaternion.hpp>
 [source-transform]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/transform.hpp>

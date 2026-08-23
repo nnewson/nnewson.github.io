@@ -77,6 +77,8 @@ collections:
   tabs:
     output: true
     sort_by: order
+  architecture:
+    output: true
 
 defaults:
   - scope:
@@ -97,6 +99,13 @@ defaults:
     values:
       layout: page
       permalink: /:title/
+  - scope:
+      path: ""
+      type: architecture
+    values:
+      layout: page
+      toc: true
+      permalink: /architecture/:path/
 
 sass:
   style: compressed
