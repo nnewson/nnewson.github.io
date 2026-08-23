@@ -423,8 +423,10 @@ for (const DrawItem& drawItem : output.drawItems)
 }
 ```
 
-Starting with the list length makes the number of dependencies part of the
-result before any IDs are mixed. Mixing IDs in traversal order means `[A, B]`,
+The loop locally reproduces the classic `boost::hash_combine` mixing expression
+instead of adding Boost for one small operation. fireEngine also seeds it with
+the list length before combining any IDs, making the number of dependencies
+part of the input from the start. Mixing IDs in traversal order means `[A, B]`,
 `[B, A]`, and `[A, A]` describe different inputs.
 
 World transforms are deliberately absent. Moving an existing instance changes
@@ -432,11 +434,11 @@ the commands recorded for the current frame, but it does not require a new mesh
 or material representation. Attaching, removing, or reordering render objects
 does change the dependency input.
 
-The constants in [`hash.hpp`][source-hash] provide an appropriately sized
-golden-ratio value for 32- or 64-bit `std::size_t`. This is a fast,
-non-cryptographic summary, not proof that two lists are equal. The next post
-will show how render preparation uses the hash as a quick check while retaining
-the exact IDs needed to reject a collision.
+The constants in [`hash.hpp`][source-hash] provide the mixing expression with
+an appropriately sized golden-ratio value for 32- or 64-bit `std::size_t`. The
+result is a fast, non-cryptographic summary, not proof that two lists are equal.
+The next post will show how render preparation uses the hash as a quick check
+while retaining the exact IDs needed to reject a collision.
 
 See the complete [`scene.cpp`][source-scene] and
 [`scene_node.cpp`][source-scene-node].
@@ -475,8 +477,8 @@ The triangle is a root because it has no parent in this tutorial scene. Its
 render object supplies reusable content; its node supplies the transform. A
 future loader can build deeper hierarchies with the same public operations.
 
-The initial transform update makes the returned content internally current.
-The main loop repeats resolution before every draw so later application-side
+The initial call resolves the scene's world transforms before returning. The
+main loop repeats that update before every draw so later application-side
 changes have an explicit point at which they become visible:
 
 ```cpp
@@ -629,9 +631,10 @@ application content and rendering:
   invalid ownership without a device.
 
 The draw list still does not say which meshes and materials need durable GPU
-representations, whether those representations can be reused, or how invalid
-cross-catalogue IDs are rejected. The next 0.7 post can make that boundary
-explicit by turning the scene's current draws into a render-preparation plan.
+representations, whether those representations can be reused, or how scene
+references are checked before indexing the asset catalogue. The next 0.7 post
+can make that boundary explicit by turning the scene's current draws into a
+render-preparation plan.
 
 ## Recommended reading
 

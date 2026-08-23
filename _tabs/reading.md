@@ -51,6 +51,12 @@ synchronization, and presentation.
 
 ## Websites
 
+### [C++ `std::expected`](https://en.cppreference.com/w/cpp/utility/expected.html)
+
+The cppreference language-library entry for the C++23 vocabulary type that
+represents either an expected value or a recoverable error without requiring an
+exception.
+
 ### [C++ subscript operator](https://en.cppreference.com/w/cpp/language/operators.html#Array_subscript_operator)
 
 The cppreference language reference for overloaded subscripting, including the
