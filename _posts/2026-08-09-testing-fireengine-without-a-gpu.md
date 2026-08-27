@@ -27,18 +27,18 @@ rendered-frame test stays in place as the twenty-fifth CTest entry.
 
 This is the first of several posts based on the same 0.7 source. The release
 also introduces maths, render assets, a scene graph, render preparation, and a
-new renderer facade; those contracts will receive their own walkthroughs. This
-post concentrates on the build and design boundaries that make them testable.
+new renderer facade. The other walkthroughs examine those contracts; this post
+concentrates on the build and design boundaries that make them testable.
 
 The walkthrough follows those changes from [release 0.6][release-0-6] to
 [release 0.7][release-0-7]. Code links remain pinned to 0.7 so each excerpt
-continues to match the published checkpoint as fireEngine evolves.
+continues to match the release as fireEngine evolves.
 
 > Source: [fireEngine 0.7]({{ page.release_url }})
 >
 > Start with [Refactoring fireEngine for what comes next][roadmap-post] for the
 > full architectural plan. All source links in this post are pinned to 0.7,
-> even though later posts will examine other parts of the same release.
+> while the other posts examine different parts of the same release.
 {: .prompt-info }
 
 ## Introduce three levels of feedback
@@ -368,13 +368,13 @@ See the complete [`test_spirv_loader.cpp`][source-test-spirv].
 ## Cover the new CPU-side systems
 
 The other four test files exercise systems introduced elsewhere in release
-0.7. Their implementation details belong in the posts that follow, but their
+0.7. Their implementation details belong in the companion posts, but their
 distribution shows the breadth of the device-free boundary:
 
 | Area | Test cases | Contract covered |
 | --- | ---: | --- |
 | Asset validation | 4 | Complete geometry, finite colours, and valid resource references |
-| Render preparation | 6 | Validation, resource sharing, revision tracking, and plan reuse |
+| Render preparation and `Color4` | 6 | Colour vocabulary, validation, resource sharing, revision tracking, and plan reuse |
 | Maths | 4 | Value construction, matrix storage, and transform composition |
 | Scene | 3 | Hierarchy, stable traversal, world transforms, and invalid ownership |
 | SPIR-V loading | 2 | Complete word loading and rejected file states |
@@ -437,7 +437,7 @@ as public API would make future refactoring needlessly expensive.
 ## Configure, build, and run release 0.7
 
 The compiler, build-tool, vcpkg, and Vulkan prerequisites remain the same as in
-the [foundation post][foundation-post]. Clone the release checkpoint directly
+the [foundation post][foundation-post]. Clone the release tag directly
 with:
 
 ```shell
@@ -468,7 +468,7 @@ On Windows:
 
 The application still displays the same coloured triangle introduced in
 release 0.6. Its mesh, material, and scene now travel through the refactored 0.7
-architecture, which the later posts in this sequence will examine.
+architecture examined by the other posts in this sequence.
 
 Running the normal preset now executes both kinds of test:
 
@@ -603,10 +603,10 @@ of understanding a failure: most new engine rules can now be checked in
 milliseconds, with a controlled input and a name that describes the broken
 contract.
 
-The next 0.7 post can build on that boundary by introducing fireEngine's small
-maths vocabulary. `Vec3`, `Vec4`, and `Mat4` will be able to establish their
-layout and transform rules through the test target before scene traversal or
-the renderer depends on them.
+The [maths post][maths-post] builds on that boundary with fireEngine's
+small maths vocabulary. `Vec3`, `Vec4`, and `Mat4` establish their layout and
+transform rules through the test target without requiring scene traversal or
+the renderer.
 
 ## Recommended reading
 
@@ -627,6 +627,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [release-0-6]: {{ page.previous_release_url }}
 [release-0-7]: {{ page.release_url }}
 [roadmap-post]: {% post_url 2026-08-08-refactoring-fireengine-for-what-comes-next %}
+[maths-post]: {% post_url 2026-08-10-giving-fireengine-a-small-maths-vocabulary %}
 [foundation-post]: {% post_url 2026-07-30-creating-fireengine-vulkan-foundation %}
 [source-cmake]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/CMakeLists.txt>
 [source-vcpkg]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/vcpkg.json>

@@ -10,6 +10,8 @@ Proof of concept. Reports four classes of problem:
   R3  box integrity         box-drawing rectangles with ragged borders
   R4  width                 blocks wide enough to force a horizontal
                             scrollbar in the rendered page
+  R5  broken run            a vertical with line art above and below but a
+                            whitespace gap in between
 
 A block preceded by `<!-- align: ignore -->` is skipped entirely; naming rules
 (`<!-- align: ignore R1 -->`) silences only those. Use it where the layout is
@@ -37,6 +39,11 @@ JOINTS = "┌┐└┘├┤┬┴┼+"
 ARROWHEADS = "v^"
 ARROWENDS = "><"
 LINEART = "─-═=│|" + JOINTS
+# A run is only broken if the character above reaches downward and the one
+# below reaches upward. `┘` closing a join and `┬` opening a new one may share
+# a column without being one line.
+CONTINUES_DOWN = "│|┌┐├┤┬+^"
+CONTINUES_UP = "│|└┘├┤┴+v"
 
 BLOCK = re.compile(r"^([ \t]*)```text[ \t]*$")
 FENCE_END = re.compile(r"^[ \t]*```[ \t]*$")
@@ -134,6 +141,10 @@ def rule_near_miss(block: Block) -> list[Finding]:
     marks = list(connectors(block))
     seen: set[tuple[int, int, int]] = set()
     for i, (row_a, col_a, kind_a) in enumerate(marks):
+        # Horizontal arrow heads sit wherever the words before them end, so
+        # their columns carry no alignment intent across rows.
+        if kind_a == "arrow end":
+            continue
         for row_b, col_b, kind_b in marks[i + 1 :]:
             if kind_a != kind_b or row_b - row_a > LINE_WINDOW:
                 continue
@@ -221,6 +232,42 @@ def rule_box(block: Block) -> list[Finding]:
     return found
 
 
+def rule_broken_run(block: Block) -> list[Finding]:
+    """R5: a vertical that has line art above and below, but a gap in between.
+
+    Only whitespace counts as a gap. Where a label or arrow deliberately
+    occupies the column the run is considered to pass behind it, which is a
+    normal way to draw and not reported.
+    """
+    marks = {
+        (row, column): block.lines[row][column]
+        for row, column, kind in connectors(block)
+        if kind != "arrow end"  # horizontal heads never form a vertical
+    }
+    found: list[Finding] = []
+    for row in range(1, len(block.lines) - 1):
+        line = block.lines[row]
+        for column in sorted({c for r, c in marks if r == row - 1}):
+            if (row, column) in marks or (row + 1, column) not in marks:
+                continue
+            if marks[(row - 1, column)] not in CONTINUES_DOWN:
+                continue
+            if marks[(row + 1, column)] not in CONTINUES_UP:
+                continue
+            if (line[column] if column < len(line) else " ") != " ":
+                continue
+            found.append(
+                Finding(
+                    block.path,
+                    block.at(row),
+                    "R5",
+                    f"column {column + 1} carries line art above and below "
+                    f"but is blank here, breaking the run",
+                )
+            )
+    return found
+
+
 def rule_width(block: Block) -> list[Finding]:
     if not any(True for _ in connectors(block)):
         # No line art: a console transcript or config excerpt, not a diagram.
@@ -244,6 +291,7 @@ RULES = {
     "R2": rule_column_drift,
     "R3": rule_box,
     "R4": rule_width,
+    "R5": rule_broken_run,
 }
 
 

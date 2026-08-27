@@ -38,7 +38,7 @@ together without repeating their implementations.
 
 The walkthrough follows the renderer changes from [release 0.6][release-0-6]
 to [release 0.7][release-0-7]. Every source link remains pinned to 0.7 so the
-examples continue to match the published checkpoint.
+examples continue to match the release.
 
 > Source: [fireEngine 0.7]({{ page.release_url }})
 >

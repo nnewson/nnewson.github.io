@@ -1,6 +1,6 @@
 Diagrams with alignment mistakes that reached publication before the checker
-existed. Running the checker over this file should report three findings:
-R1 on the first, R2 on the second, R3 (and R1) on the third.
+existed. Running the checker over this file should report findings on every one:
+R1 on the first, R2 on the second, R3 (and R1) on the third, R5 on the fourth.
 
 Misaligned joins — the two `+` sit one column apart:
 
@@ -30,4 +30,27 @@ Ragged box — the right edge drifts:
   │  prepare()      │
   │  drawFrame()      │
   └──────────────────┘
+```
+
+Broken vertical run — the collector loses its line on one row:
+
+```text
+glTF document
+    │
+    ├─ images ─> textures ─> materials ──┐
+    │                                    ├─> RenderAssets ─────────────┐
+    ├─ accessors ─> meshes ─> primitives ┘                             │
+    │                                                                  │
+    ├─ animation samplers ─> channels ───┬─> animations ───────────────┤
+    │                                    │                             │
+    │                                    └─> node bindings ┐
+    │                                                      ├─> Scene ──┤
+    └─ selected scene ─> nodes ────────────────────────────┘           │
+                                                                       │
+    ┌──────────────────────────────────────────────────────────────────┘
+    v
+    update world transforms, then validateSceneContent()
+    │
+    v
+    SceneContent
 ```

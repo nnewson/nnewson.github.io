@@ -31,13 +31,14 @@ before the renderer turns that plan into Vulkan buffers and draw commands.
 
 The walkthrough follows the preparation changes from [release 0.6][release-0-6]
 to [release 0.7][release-0-7]. Every source link remains pinned to 0.7 so the
-examples continue to match the published checkpoint.
+examples continue to match the release.
 
 > Source: [fireEngine 0.7]({{ page.release_url }})
 >
 > Start with [Building fireEngine's first scene graph][scene-post] for the draw
 > list consumed here. This post produces a validated, Vulkan-free compilation
-> plan; allocating and drawing its GPU resources belongs to the next part.
+> plan; the [renderer-facade post][renderer-post] covers allocating and
+> drawing its GPU resources.
 {: .prompt-info }
 
 ## Define the compilation boundary
@@ -442,9 +443,10 @@ return without replacing GPU resources. Transform-only changes do not require
 another preparation call because their values are consumed later by
 `drawFrame()`.
 
-This post stops at the CPU plan and its invalidation rules. The next post can
-follow [`Renderer::prepare()`][source-renderer] as it consumes the plan, uploads
-the selected meshes, and establishes the contract checked by `drawFrame()`.
+This post stops at the CPU plan and its invalidation rules. The
+[renderer-facade post][renderer-post] follows
+[`Renderer::prepare()`][source-renderer] as it consumes the plan, uploads the
+selected meshes, and establishes the contract checked by `drawFrame()`.
 
 See the complete [`main.cpp`][source-main].
 
@@ -600,9 +602,9 @@ explicit compilation input:
   handling, and revision independence without a device.
 
 The plan still does not own a vertex buffer, material lookup, command buffer,
-or Vulkan handle. The final 0.7 refactoring post can now turn `Renderer` into
-the Vulkan facade: consume this plan during `prepare()`, retain compiled GPU
-resources, and use current draw items during `drawFrame()`.
+or Vulkan handle. The [renderer-facade post][renderer-post] shows how
+`Renderer` consumes this plan during `prepare()`, retains compiled GPU
+resources, and uses current draw items during `drawFrame()`.
 
 ## Recommended reading
 
@@ -625,6 +627,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [maths-post]: {% post_url 2026-08-10-giving-fireengine-a-small-maths-vocabulary %}
 [assets-post]: {% post_url 2026-08-12-describing-fireengines-render-assets-without-vulkan %}
 [scene-post]: {% post_url 2026-08-14-building-fireengines-first-scene-graph %}
+[renderer-post]: {% post_url 2026-08-18-turning-fireengines-renderer-into-the-vulkan-facade %}
 [source-scene-draw-list]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/scene/scene_draw_list.hpp>
 [source-render-preparation-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/graphics/render_preparation.hpp>
 [source-render-preparation-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/src/graphics/render_preparation.cpp>

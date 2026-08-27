@@ -31,17 +31,18 @@ This is the third post based on release 0.7. The
 [second][maths-post] introduced the `Vec3`, `Vec4`, and `Mat4` vocabulary used by
 the scene. This post concentrates on render descriptions and their ownership.
 Scene hierarchy, preparation-plan caching, and renderer-owned GPU resources
-remain separate topics in the posts that follow.
+remain separate topics in the companion posts.
 
 The walkthrough follows the asset changes from [release 0.6][release-0-6] to
 [release 0.7][release-0-7]. Every source link remains pinned to 0.7 so the
-examples continue to match the published checkpoint.
+examples continue to match the release.
 
 > Source: [fireEngine 0.7]({{ page.release_url }})
 >
 > Start with [Giving fireEngine a small maths vocabulary][maths-post] for the
 > vector and matrix types used here. This post stops at validated CPU-side
-> descriptions; it does not yet compile them into Vulkan resources.
+> descriptions; the [renderer-facade post][renderer-post] covers their
+> compilation into Vulkan resources.
 {: .prompt-info }
 
 ## Introduce a typed asset graph
@@ -62,8 +63,8 @@ RenderObjectId
 ```
 
 `RenderAssets` owns the dense collections at the right-hand side. A render
-object connects one mesh and one material, while a scene will later refer to the
-render object through its ID.
+object connects one mesh and one material, while a scene refers to the render
+object through its ID.
 
 These are explicit domain types rather than one generic graph abstraction.
 There are only three relationships to express, and naming each one makes an
@@ -105,8 +106,8 @@ descriptor, format, usage flag, or command type. Adding an asset does not upload
 memory or record work. It changes an ordinary CPU-owned catalogue and returns a
 small ID.
 
-The renderer will eventually compile the required descriptions into vertex and
-index buffers, pipeline state, push constants, and draw commands. Keeping that
+The 0.7 renderer compiles the required descriptions into vertex and index
+buffers, pipeline state, push constants, and draw commands. Keeping that
 conversion on the renderer side preserves a useful dependency direction:
 
 ```text
@@ -345,7 +346,7 @@ MeshId RenderAssets::addMesh(Mesh mesh)
 Meshes move their potentially larger vectors into ownership. Materials and
 render objects are small values and are copied into their collections. Every
 insertion increments the shared revision because each can change what GPU
-preparation will eventually require.
+preparation requires.
 
 The collection accessors return const vectors. Callers can inspect the catalogue
 but cannot modify an element behind `RenderAssets` and bypass its revision. New
@@ -425,8 +426,9 @@ Vulkan error code.
 The testing post explained why this function moved behind a testable `detail`
 interface. Here the important contract is when validation happens: after the
 application has assembled a catalogue and before the renderer treats those
-descriptions as safe compilation input. The next render-preparation post will
-cover that call site and its caching policy.
+descriptions as safe compilation input. The
+[render-preparation post][preparation-post] covers that call site and its
+caching policy.
 
 ## Make the application own the triangle description
 
@@ -549,7 +551,8 @@ to exercise the description rules directly.
 One additional case in
 [`test_render_preparation.cpp`][source-test-preparation] verifies that `Color4`
 exposes `r`, `g`, `b`, and `a` with the values supplied by the caller. The
-preparation behaviour in that file belongs to a later post.
+render-preparation behaviour in that file is covered by the
+[render-preparation post][preparation-post].
 
 The invalid-geometry case uses Catch2 sections to share one valid starting mesh:
 
@@ -672,9 +675,10 @@ render content out of the Vulkan implementation:
 - five focused Catch2 cases verify the asset-domain contract without a device.
 
 The catalogue still does not decide which assets a scene currently needs, and
-it does not allocate their GPU representations. The next 0.7 post can build the
-first scene graph: a Vulkan-free hierarchy of nodes that instances these render
-objects and produces current world transforms in stable traversal order.
+it does not allocate their GPU representations. The
+[scene-graph post][scene-post] builds the Vulkan-free hierarchy of nodes
+that instances these render objects and produces current world transforms in
+stable traversal order.
 
 ## Recommended reading
 
@@ -694,6 +698,9 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [release-0-7]: {{ page.release_url }}
 [testing-post]: {% post_url 2026-08-09-testing-fireengine-without-a-gpu %}
 [maths-post]: {% post_url 2026-08-10-giving-fireengine-a-small-maths-vocabulary %}
+[scene-post]: {% post_url 2026-08-14-building-fireengines-first-scene-graph %}
+[preparation-post]: {% post_url 2026-08-16-preparing-fireengines-scene-data-explicitly %}
+[renderer-post]: {% post_url 2026-08-18-turning-fireengines-renderer-into-the-vulkan-facade %}
 [source-color4]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/graphics/color4.hpp>
 [source-vertex]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/graphics/vertex.hpp>
 [source-mesh]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/graphics/mesh.hpp>
