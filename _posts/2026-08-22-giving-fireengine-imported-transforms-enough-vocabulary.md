@@ -8,7 +8,6 @@ description: >-
   decomposed TRS transforms, Vulkan camera matrices, and stable scene-node IDs.
 release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.8"
 previous_release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.7"
-source_commit_url: "https://github.com/nnewson/fireEngine-tutorial/commit/d75c3d669fde4e5392be19b44b10a4e9d2062114"
 ---
 
 Release 0.7 gave fireEngine just enough maths to position its tutorial triangle.
@@ -18,32 +17,29 @@ the first scene graph.
 
 An imported glTF scene asks more of that vocabulary. Texture coordinates need
 two components. Nodes can rotate as well as translate and scale. Animation must
-address a node after loading and change one transform channel without first
-recovering it from a matrix. A later camera also needs view and projection
-conventions that agree with Vulkan before any geometry is culled or drawn.
+change one transform channel without first recovering it from a matrix. The
+camera also needs view and projection conventions that agree with Vulkan before
+any geometry is culled or drawn.
 
-The first implementation step towards release 0.8 supplies those contracts. It
-adds `Vec2`, robust `Vec3` normalisation, quaternions, decomposed TRS transforms,
-camera matrices, and stable scene-local node identities. It does not load glTF,
-describe textures or animations, or change the rendered subject yet. The
-triangle remains the small integration path while the CPU-owned foundations
-grow underneath it.
+Release 0.8 supplies those contracts through `Vec2`, robust `Vec3`
+normalisation, quaternions, decomposed TRS transforms, camera matrices, and
+stable scene-local node identities. The loader, animation system, camera, and
+renderer all consume this vocabulary; this article concentrates on the maths
+and scene-identity layer they share.
 
 This is the first detailed post based on release 0.8. The
 [architectural overview][planning-post] describes the complete path from the
-structured triangle to AnimatedCube. This walkthrough stays deliberately at
-the first non-merge commit after release 0.7, so later asset, loader, animation,
-and renderer work does not leak into this checkpoint.
+structured triangle to AnimatedCube. The code and commands below target the
+completed [fireEngine 0.8 release][release-0-8], while keeping the discussion
+focused on imported transforms.
 
-> Starting point: [fireEngine 0.7][release-0-7]
+> Code for this article: [fireEngine 0.8][release-0-8]
 >
-> Source checkpoint: [Add TRS scene transforms and stable node identities][source-commit]
->
-> Release destination: [fireEngine 0.8][release-0-8]
+> Previous release: [fireEngine 0.7][release-0-7]
 >
 > Start with [Growing fireEngine into an animated glTF renderer][planning-post]
-> for the release plan. This post covers its first implementation step only:
-> giving imported transforms enough mathematical and scene identity vocabulary.
+> for the release plan. This post examines the mathematical and scene-identity
+> vocabulary used by imported transforms throughout version 0.8.
 {: .prompt-info }
 
 ## Extend the existing layer instead of replacing it
@@ -56,9 +52,8 @@ The release 0.7 maths types already fixed the important representation rules:
 - `parentWorld * local` resolves scene hierarchy; and
 - a `Mat4` crosses the Slang boundary without transposition or repacking.
 
-Release 0.8 keeps those choices. The first change extends the public CPU layer,
-updates scene resolution and application construction, and expands the
-device-free tests around them:
+Release 0.8 keeps those choices while extending the public CPU layer, scene
+resolution, import path, animation playback, and device-free tests around them:
 
 ```text
 include/fire_engine/
@@ -114,9 +109,9 @@ visible, and exact equality has the same limited role as it does for `Vec3` and
 `Vec4`: values copied from the same source can be compared directly, while
 results of floating-point arithmetic need a tolerance.
 
-No mesh uses `Vec2` at this checkpoint. Introducing it before the asset change
-keeps that next step about texture descriptions rather than mixing a new maths
-primitive into the same diff.
+In release 0.8, `Vertex::textureCoordinate` uses `Vec2` directly. Keeping the
+pair as a small maths aggregate lets mesh descriptions and the glTF loader
+share it without exposing a parser or graphics-API type.
 
 See [`vec2.hpp`][source-vec2].
 
@@ -157,7 +152,7 @@ misclassified before division even began.
 
 ## Report normalisation failure as a value
 
-Normalisation has two recoverable failure categories in this checkpoint:
+Normalisation has two recoverable failure categories in release 0.8:
 
 ```cpp
 enum class NormalizeError : std::uint8_t
@@ -287,11 +282,11 @@ normalizedLerp(Quaternion right, float amount) const noexcept
 Linear interpolation does not preserve unit length, so the result is
 normalised before it is returned. The `amount` is normally between zero and
 one, but this function does not clamp it; choosing the playback interval and
-interpolation amount will belong to the later animation layer.
+interpolation amount belongs to the animation playback layer.
 
 This is normalised linear interpolation rather than spherical interpolation.
-It is sufficient for the selected 0.8 animation and gives that future code one
-small, tested rotation operation instead of embedding quaternion policy in an
+It is sufficient for the selected 0.8 animation and gives playback one small,
+tested rotation operation instead of embedding quaternion policy in an
 animation class.
 
 See [`quaternion.hpp`][source-quaternion].
@@ -362,7 +357,7 @@ void SceneNode::resolve(const Mat4& parentWorld) noexcept
 }
 ```
 
-This preserves the 0.7 hierarchy rule. A later animation can replace a node's
+This preserves the 0.7 hierarchy rule. Animation playback can replace a node's
 rotation without changing its translation or scale, then the ordinary world
 update rebuilds the matrices consumed by draw traversal. No renderer or render
 asset needs to know which channel changed.
@@ -370,11 +365,10 @@ asset needs to know which channel changed.
 See [`scene_node.hpp`][source-scene-node-header] and
 [`scene_node.cpp`][source-scene-node].
 
-## Fix camera conventions before a camera consumes them
+## Fix camera conventions at the maths boundary
 
-The perspective camera arrives later in release 0.8, but this first maths step
-defines its matrix operations so their coordinate rules can be tested in
-isolation.
+The release 0.8 camera uses matrix operations defined in the maths layer, where
+their coordinate rules can be tested without a renderer or device.
 
 `Mat4::lookAt()` builds a right-handed view matrix. It normalises the direction
 from `eye` to `target`, derives a right vector from the supplied up direction,
@@ -429,17 +423,18 @@ near plane maps to depth zero and the far plane to one. Negating the Y scale in
 the projection compensates for a positive-height Vulkan viewport, keeping
 positive view-space Y visually upward.
 
-These choices remain ordinary maths tests at this checkpoint. The later camera
-and depth step will decide when the renderer builds and uploads the matrix.
+These choices remain ordinary maths tests. The renderer decides when to build
+and upload the camera matrix, but it does not own the conventions encoded by
+the maths type.
 
 See the camera factories in [`mat4.hpp`][source-mat4].
 
-## Give imported animations stable node targets
+## Give scenes stable node identities
 
-A future animation channel needs to refer back to the scene node it changes.
-Names are diagnostic text and need not be unique. Traversal positions can shift
-as hierarchies grow. Memory addresses are awkward public keys and would expose
-ownership details to imported content.
+Scene tools and systems need a stable way to find a node after loading. Names
+are diagnostic text and need not be unique. Traversal positions can shift as
+hierarchies grow. Memory addresses are awkward public keys and would expose
+ownership details to callers.
 
 `SceneNodeId` follows the typed-ID pattern already used by render assets:
 
@@ -485,8 +480,8 @@ std::optional<SceneNodeRef> Scene::findNode(SceneNodeId id) noexcept
 
 C++23 has no `std::optional<T&>`, so `SceneNodeRef` and `SceneNodeConstRef`
 isolate the `std::reference_wrapper` substitute. Mutable and const overloads
-retain the scene's ownership while letting later animation code update a found
-node or inspect it read-only.
+retain the scene's ownership while letting callers update a found node or
+inspect it read-only.
 
 See [`scene_node_id.hpp`][source-scene-node-id] and
 [`scene.hpp`][source-scene-header].
@@ -517,8 +512,8 @@ Calling the function again skips nodes that already have IDs, so repeated world
 updates do not renumber animation targets. Invalid-sentinel and out-of-range
 IDs return no node.
 
-There is one deliberate looseness in this checkpoint. A child added after its
-root has entered the scene does not receive an ID at mutation time. The next
+There is one deliberate looseness in release 0.8. A child added after its root
+has entered the scene does not receive an ID at mutation time. The next
 `updateWorldTransforms()` discovers and registers it before resolving the
 hierarchy:
 
@@ -544,40 +539,34 @@ treating it as a process-wide identity.
 
 See the complete [`scene.cpp`][source-scene].
 
-## Migrate the triangle without changing its meaning
+## Carry TRS from loading into animation
 
-The application replaces its hand-composed local matrix with the decomposed
-value:
+The final 0.8 application loads AnimatedCube rather than constructing a
+triangle. `GltfLoader` converts each selected glTF node into a decomposed
+`Transform`, preserving translation, normalised rotation, and scale as
+independent source values.
+
+Animation playback can then replace only the rotation:
 
 ```cpp
-fire_engine::SceneNode& node = content.scene.addRoot("Tutorial triangle");
-node.localTransform({
-    .translation = {.x = 0.12f, .y = 0.0f, .z = 0.0f},
-    .rotation = fire_engine::Quaternion::identity(),
-    .scale = {.x = 0.9f, .y = 0.9f, .z = 1.0f},
-});
-node.renderObject(triangle);
-content.scene.updateWorldTransforms();
+Transform transform = node.localTransform();
+transform.rotation = sampleRotation(channel, animator.playbackTime);
+node.localTransform(transform);
 ```
 
-The rightmost scale still reduces the triangle to 90 per cent before the
-translation moves it slightly right. Writing the rotation explicitly proves
-the new path while preserving identity behaviour. Render preparation still
-ignores transform-only movement, and the renderer still receives the same
-resolved world matrix through the draw list.
+The frame loop calls `updateWorldTransforms()` afterwards, resolving the
+current local TRS values into the matrices used for drawing. Neither animation
+nor ordinary movement changes the asset revision or render-object dependency
+list, so prepared GPU resources remain reusable while the cube rotates.
 
-The unchanged picture is useful evidence here: replacing source transform
-representation has not changed scene composition, preparation dependencies, or
-the CPU/shader matrix contract.
-
-See the complete [`main.cpp`][source-main].
+See [`gltf_loader.cpp`][source-gltf-loader] and
+[`animation_playback.cpp`][source-animation-playback].
 
 ## Test the new contracts without a device
 
-The checkpoint raises the device-free Catch2 count from 24 to 29. Five new test
-cases cover quaternion operations, numerical stability, TRS composition,
-camera conventions, and scene identities. The existing vector aggregate case
-also grows to include `Vec2`.
+The release's device-free tests cover quaternion operations, numerical
+stability, TRS composition, camera conventions, scene identities, and the
+`Vec2` aggregate contract.
 
 The magnitude test uses values that expose the difference between robust
 normalisation and a direct sum of squares:
@@ -616,17 +605,16 @@ See the complete [`test_mat4.cpp`][source-test-mat4],
 
 ## Run the transform and identity tests
 
-Configure and build the source checkpoint through the same vcpkg preset used by
-release 0.7. CTest can select the five new cases and the expanded vector case by
-their anchored prefixes:
+Configure and build release 0.8 through its vcpkg preset. CTest can select six
+focused transform and identity cases by their anchored prefixes:
 
 ```shell
 ctest --preset default -R "^(Vector aggregates|Quaternion normalization|Normalization remains|Transform composes|Mat4 camera|Scene assigns)"
 ```
 
-The filter selects exactly those six cases at this commit. The remaining maths,
-scene, asset, preparation, swapchain, and SPIR-V cases, plus the Vulkan smoke
-test, remain outside the focused run.
+The filter selects those six cases in release 0.8. The remaining maths, scene,
+asset, loading, animation, rendering, and Vulkan scenarios remain outside the
+focused run.
 
 ## Diagnose the new failure boundaries
 
@@ -679,7 +667,7 @@ matrix.
 
 ### A newly added child has no `SceneNodeId`
 
-In this checkpoint, adding a child beneath an already registered node does not
+In release 0.8, adding a child beneath an already registered node does not
 register it immediately. Call `updateWorldTransforms()` before requesting its
 ID. Roots and complete detached subtrees passed to `addRoot()` are registered
 at once.
@@ -693,8 +681,8 @@ that it came from another scene when both scenes contain the same slot.
 ## What this part of release 0.8 gives us
 
 The 0.8 overview established the path to one imported, textured, animated
-scene. This first implementation step supplies the values and identities that
-path will depend on:
+scene. This part of the release supplies the values and identities shared by
+that path:
 
 - `Vec2` represents the two-component coordinates needed by textured meshes;
 - `Vec3` gains subtraction, dot, right-handed cross, squared-length, and
@@ -714,20 +702,18 @@ path will depend on:
 - right-handed look-at reports degenerate runtime bases explicitly;
 - perspective validates setup and fixes Vulkan's zero-to-one depth and Y
   direction;
-- `SceneNodeId` gives later animation channels a typed, stable, scene-local
-  target;
+- `SceneNodeId` gives callers a typed, stable, scene-local lookup key;
 - dense lookup returns optional mutable or const references without transferring
   ownership;
 - nodes become immovable so registered pointer identity remains stable;
 - world updates discover descendants added after initial scene registration;
-- 29 device-free cases now cover the expanded maths and scene contracts; and
-- the tutorial triangle preserves the complete 0.7 render path through its new
-  TRS source representation.
+- the glTF loader preserves imported TRS values in this shared vocabulary; and
+- animation playback changes rotation without rebuilding stable resources.
 
-No image, texture, sampler, animation clip, or loader exists at this checkpoint.
-The [next 0.8 step][descriptions-post] extends Vulkan-free asset descriptions
-and defines animation data using `Vec2`, `Quaternion`, `Transform`, and
-`SceneNodeId` without inventing those contracts inside the renderer or importer.
+The rest of release 0.8 builds on these contracts. The
+[descriptions post][descriptions-post] concentrates on Vulkan-free texture and
+animation descriptions, while the loader, camera, playback, and renderer remain
+consumers of the same maths and scene model.
 
 ## Recommended reading
 
@@ -748,24 +734,24 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 
 [release-0-7]: {{ page.previous_release_url }}
 [release-0-8]: {{ page.release_url }}
-[source-commit]: {{ page.source_commit_url }}
 [planning-post]: {% post_url 2026-08-20-growing-fireengine-into-an-animated-gltf-renderer %}
 [descriptions-post]: {% post_url 2026-08-23-extending-fireengines-descriptions-without-introducing-vulkan %}
-[source-normalize-error]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/normalize_error.hpp>
-[source-quaternion]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/quaternion.hpp>
-[source-transform]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/transform.hpp>
-[source-vec2]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/vec2.hpp>
-[source-vec3]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/vec3.hpp>
-[source-mat4]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/math/mat4.hpp>
-[source-scene-node-id]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/scene/scene_node_id.hpp>
-[source-scene-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/scene/scene.hpp>
-[source-scene-node-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/include/fire_engine/scene/scene_node.hpp>
-[source-scene]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/src/scene/scene.cpp>
-[source-scene-node]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/src/scene/scene_node.cpp>
-[source-main]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/src/main.cpp>
-[source-test-mat4]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/tests/math/test_mat4.cpp>
-[source-test-scene]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/tests/scene/test_scene.cpp>
-[source-test-preparation]: <https://github.com/nnewson/fireEngine-tutorial/blob/d75c3d669fde4e5392be19b44b10a4e9d2062114/tests/graphics/test_render_preparation.cpp>
+[source-normalize-error]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/math/normalize_error.hpp>
+[source-quaternion]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/math/quaternion.hpp>
+[source-transform]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/math/transform.hpp>
+[source-vec2]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/math/vec2.hpp>
+[source-vec3]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/math/vec3.hpp>
+[source-mat4]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/math/mat4.hpp>
+[source-scene-node-id]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/scene/scene_node_id.hpp>
+[source-scene-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/scene/scene.hpp>
+[source-scene-node-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/scene/scene_node.hpp>
+[source-scene]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/scene/scene.cpp>
+[source-scene-node]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/scene/scene_node.cpp>
+[source-gltf-loader]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/gltf/gltf_loader.cpp>
+[source-animation-playback]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/animation/animation_playback.cpp>
+[source-test-mat4]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/tests/math/test_mat4.cpp>
+[source-test-scene]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/tests/scene/test_scene.cpp>
+[source-test-preparation]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/tests/graphics/test_render_preparation.cpp>
 [reading-foundations]: <https://foundationsofgameenginedev.com/#fged1>
 [reading-real-time-rendering]: <https://www.realtimerendering.com/>
 [reading-gltf-transforms]: <https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#transformations>

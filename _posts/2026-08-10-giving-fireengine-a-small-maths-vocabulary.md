@@ -15,9 +15,9 @@ transform. The frame uniform stored a raw array of sixteen floats named
 `transform` on both sides of the CPU/shader boundary, and an identity matrix was
 enough because there was only one object in one fixed position.
 
-Release 0.7 needs more precise language. Scene nodes will have local and world
-transforms. A parent transform will compose with its child's transform. Stable
-frame-wide state will be separate from the model matrix belonging to one draw.
+Release 0.7 supplies more precise language. Scene nodes have local and world
+transforms. A parent transform composes with its child's transform. Stable
+frame-wide state is separate from the model matrix belonging to one draw.
 Those relationships are much easier to state with a matrix type than with
 arrays whose meaning exists only in the code that fills them.
 
@@ -28,13 +28,13 @@ and cross the existing CPU/shader boundary without repacking data.
 
 This is the second post based on release 0.7. The
 [first 0.7 post][testing-post] separated the engine into a reusable library and
-added the device-free test target that will verify these new value types. Later
-posts will use them to describe render assets, build the scene graph, prepare
+added the device-free test target that verifies these new value types. The
+other posts use them to describe render assets, build the scene graph, prepare
 render data, and drive the refactored renderer.
 
 The walkthrough follows the maths changes from [release 0.6][release-0-6] to
 [release 0.7][release-0-7]. Every source link remains pinned to 0.7 so the
-examples continue to match this checkpoint as the maths layer grows.
+examples continue to match the release as the maths layer grows.
 
 > Source: [fireEngine 0.7]({{ page.release_url }})
 >
@@ -391,7 +391,7 @@ TEST_CASE("Mat4 composes parent and local transforms")
 
 The input position first becomes `(2, 3, 4)`, then the translation adds another
 `(2, 3, 4)`, producing `(4, 6, 8)`. The assertion is more than a multiplication
-check: it fixes the convention that later scene traversal will use.
+check: it fixes the convention that scene traversal uses.
 
 ## Resolve parent and local transforms consistently
 
@@ -414,7 +414,7 @@ The local transform is applied first, positioning the node relative to its
 parent. The already-resolved parent transform then carries that result into
 world space. A deeper hierarchy repeats the same rule from the roots downwards.
 
-The [next scene-graph post][scene-post] examines ownership and traversal in more
+The [scene-graph post][scene-post] examines ownership and traversal in more
 detail. For this maths layer, the important point is that the composition
 convention has one implementation and one device-free test before hierarchy
 depends on it.
@@ -507,9 +507,10 @@ matrix, then transforms the world-space result by the frame's view-projection
 matrix. The model matrix changes between draws through push constants; the
 frame uniform can remain bound for the complete group of draws.
 
-The material colour beside `model` belongs to the Vulkan-free render-description
-work covered by the next post. Its presence here demonstrates why the two
-transform levels are not merely different names for the same data.
+The material colour beside `model` belongs to the Vulkan-free
+render-description work covered by the [render-assets post][assets-post].
+Its presence here demonstrates why the two transform levels are not merely
+different names for the same data.
 
 See [`draw_constants.hpp`][source-draw-constants] and the complete
 [`triangle.slang`][source-shader].
@@ -658,9 +659,10 @@ gives scene and rendering code a small, shared mathematical language:
   complete CPU/shader path.
 
 The layer is intentionally incomplete. That is what keeps its contract clear.
-The next 0.7 post can now use `Vec3` for vertex positions while introducing
-Vulkan-free meshes, materials, render objects, typed identifiers, and the
-separate `Color4` value that keeps colour-domain data out of the maths API.
+The [render-assets post][assets-post] uses `Vec3` for vertex positions while
+introducing Vulkan-free meshes, materials, render objects, typed identifiers,
+and the separate `Color4` value that keeps colour-domain data out of the maths
+API.
 
 ## Recommended reading
 
@@ -679,6 +681,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [release-0-6]: {{ page.previous_release_url }}
 [release-0-7]: {{ page.release_url }}
 [testing-post]: {% post_url 2026-08-09-testing-fireengine-without-a-gpu %}
+[assets-post]: {% post_url 2026-08-12-describing-fireengines-render-assets-without-vulkan %}
 [scene-post]: {% post_url 2026-08-14-building-fireengines-first-scene-graph %}
 [source-cmake]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/CMakeLists.txt>
 [source-vec3]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/math/vec3.hpp>

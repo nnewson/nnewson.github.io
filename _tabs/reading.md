@@ -83,7 +83,13 @@ surface APIs, including the lifetime and platform rules behind them.
 The Khronos definition of animation samplers, channels, target nodes and paths,
 input timestamps, output values, and supported interpolation modes.
 
-### [glTF 2.0 specification: Scenes and Nodes](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes-and-nodes)
+### [glTF 2.0 specification: Buffers, Buffer Views, and Accessors](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#buffers-and-buffer-views)
+
+The Khronos definitions of binary storage, byte ranges, interleaved stride,
+typed accessors, and sparse data used when translating glTF geometry and
+animation samples.
+
+### [glTF 2.0 specification: Scenes and Nodes](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes)
 
 The Khronos definition of scenes, ordered root nodes, child hierarchies, and
 local transforms in glTF 2.0, providing a concrete interchange model for
@@ -93,6 +99,12 @@ scene-graph ownership and traversal.
 
 The Khronos definitions of images, samplers, textures, and texture coordinates
 used to describe sampled surface colour.
+
+### [fastgltf](https://github.com/spnda/fastgltf)
+
+The C++ glTF parsing library used behind fireEngine's format-specific loading
+boundary, including helpers for traversing accessors without assuming packed
+buffer layouts.
 
 ### [How to Vulkan](https://howtovulkan.com)
 

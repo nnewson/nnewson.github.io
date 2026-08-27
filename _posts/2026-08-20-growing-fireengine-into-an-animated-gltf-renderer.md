@@ -103,11 +103,11 @@ The 0.7 scene graph can translate and scale its triangle, but an imported scene
 needs a fuller transform model. The first part of the sequence will add the
 smallest mathematical vocabulary required by the selected content.
 
-`Vec2` will represent texture coordinates. `Quaternion` will provide identity,
-normalisation, shortest-arc interpolation, and matrix conversion. A decomposed
-`Transform` will keep translation, rotation, and scale as the source values for
-each node, while `Mat4` will gain the look-at and perspective operations needed
-by a camera.
+`Vec2` will represent texture coordinates. `Quaternion` will represent
+orientation and provide the identity rotation, normalisation, shortest-arc
+interpolation, and matrix conversion. A decomposed `Transform` will keep
+translation, rotation, and scale as the source values for each node, while
+`Mat4` will gain the look-at and perspective operations needed by a camera.
 
 This is also the point to make numerical failure explicit. Quaternion and
 vector normalisation should remain stable across extreme finite magnitudes,
@@ -226,9 +226,10 @@ image views, and compile engine filtering and wrapping choices into Vulkan
 samplers. The preparation plan will ensure that only images and textures used
 by the current scene receive those representations.
 
-Uploads will borrow the single frame slot's command pool and fence after
-earlier work has been quiesced. That is acceptable for this one-frame renderer;
-a dedicated upload context belongs to a later resource compiler.
+Uploads will reuse the single frame slot's command pool and fence after waiting
+for any earlier GPU work using that frame slot to finish. That is acceptable
+for this one-frame renderer; a dedicated upload context belongs to a later
+resource compiler.
 
 Materials without a base-colour texture need the same draw path. A persistent
 one-pixel white image and sampler will provide a neutral fallback rather than
@@ -240,9 +241,10 @@ that colour by the material and vertex factors. Imported vertices can begin
 with white vertex colour, leaving the decoded texture and material factor to
 produce the visible surface.
 
-One mip level and no anisotropic filtering are enough for this checkpoint.
-Mipmap generation and richer sampling policy should arrive when the engine can
-demonstrate their complete resource and synchronization requirements.
+Release 0.8 needs only one mip level and no anisotropic filtering.
+Mipmaps and richer sampling can wait until something in the tutorial needs
+them. Both add resources and synchronisation work, and neither earns that while
+a single unmipped texture is all that gets sampled.
 
 ## Add a camera, depth, and culling together
 
@@ -328,10 +330,13 @@ meshes, fallback resources, upload machinery, and render-object lookup.
 `DepthBuffer` will remain a direct owner inside replaceable presentation state.
 
 Candidate graphs should be built locally and committed only after every
-allocation succeeds. Borrowers must be replaced before owners they point into.
-Naming that commit protocol will make repeated preparation and exception safety
-reviewable instead of relying on a fortunate sequence of assignments in one
-large `renderer.cpp`.
+allocation succeeds. For example, each compiled render-object lookup borrows
+pointers to its compiled mesh and texture. Those lookup entries must be
+replaced before the mesh and texture owners are replaced, so no pointer is left
+dangling even briefly. That ordering is the whole protocol: build the new
+graph, swap the borrowers, then release the old owners. Writing it down makes
+repeated preparation and exception safety reviewable, instead of resting on a
+fortunate sequence of assignments in one large `renderer.cpp`.
 
 ## Verify complete application scenarios
 
@@ -352,9 +357,11 @@ Four bounded application scenarios will cover the main paths:
   resources survive.
 
 Debug variants can enable synchronization validation for repeated preparation
-and recreation. All Vulkan scenarios should fail when validation reports an
-error, share one CTest resource lock, and retain warnings for diagnosis without
-treating driver-specific performance advice as a correctness failure.
+and recreation. All Vulkan scenarios should fail when a validation error is
+reported, and should share one CTest resource lock so they never contend for
+the device. Warnings stay visible for diagnosis: a validation layer's
+performance suggestion is not a correctness failure and should not fail the
+run.
 
 The basic scenario will run from an isolated working directory, away from the
 executable and copied assets, to prove that compiled asset and shader paths do

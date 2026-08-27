@@ -30,13 +30,14 @@ preparation decides which GPU resources the draw list requires.
 
 The walkthrough follows the scene changes from [release 0.6][release-0-6] to
 [release 0.7][release-0-7]. Every source link remains pinned to 0.7 so the
-examples continue to match the published checkpoint.
+examples continue to match the release.
 
 > Source: [fireEngine 0.7]({{ page.release_url }})
 >
 > Start with [Describing fireEngine's render assets without Vulkan][assets-post]
 > for the IDs instanced by scene nodes. This post produces a current draw list;
-> compiling that list into durable Vulkan resources belongs to the next part.
+> the [render-preparation post][preparation-post] covers how that list
+> selects durable resources.
 {: .prompt-info }
 
 ## Introduce the scene-graph vocabulary
@@ -437,8 +438,9 @@ does change the dependency input.
 The constants in [`hash.hpp`][source-hash] provide the mixing expression with
 an appropriately sized golden-ratio value for 32- or 64-bit `std::size_t`. The
 result is a fast, non-cryptographic summary, not proof that two lists are equal.
-The next post will show how render preparation uses the hash as a quick check
-while retaining the exact IDs needed to reject a collision.
+The [render-preparation post][preparation-post] shows how preparation uses
+the hash as a quick check while retaining the exact IDs needed to reject a
+collision.
 
 See the complete [`scene.cpp`][source-scene] and
 [`scene_node.cpp`][source-scene-node].
@@ -461,9 +463,9 @@ typed IDs, not references whose lifetime depends on vector storage. Destruction
 therefore needs no Vulkan work and no recursive coordination with the asset
 catalogue.
 
-The [asset post][assets-post] covered construction of the triangle's mesh,
-material, and render object. Once that work returns a `RenderObjectId`, the
-scene-specific half of [`makeTriangleScene()`][source-main] is small:
+The [render-assets post][assets-post] covered construction of the triangle's
+mesh, material, and render object. Once that work returns a `RenderObjectId`,
+the scene-specific half of [`makeTriangleScene()`][source-main] is small:
 
 ```cpp
 fire_engine::SceneNode& node = content.scene.addRoot("Tutorial triangle");
@@ -632,9 +634,9 @@ application content and rendering:
 
 The draw list still does not say which meshes and materials need durable GPU
 representations, whether those representations can be reused, or how scene
-references are checked before indexing the asset catalogue. The next 0.7 post
-can make that boundary explicit by turning the scene's current draws into a
-render-preparation plan.
+references are checked before indexing the asset catalogue. The
+[render-preparation post][preparation-post] makes that boundary explicit by
+turning the scene's current draws into a render-preparation plan.
 
 ## Recommended reading
 
@@ -655,6 +657,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [testing-post]: {% post_url 2026-08-09-testing-fireengine-without-a-gpu %}
 [maths-post]: {% post_url 2026-08-10-giving-fireengine-a-small-maths-vocabulary %}
 [assets-post]: {% post_url 2026-08-12-describing-fireengines-render-assets-without-vulkan %}
+[preparation-post]: {% post_url 2026-08-16-preparing-fireengines-scene-data-explicitly %}
 [source-hash]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/core/hash.hpp>
 [source-draw-item]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/graphics/draw_item.hpp>
 [source-scene-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/scene/scene.hpp>
@@ -666,5 +669,5 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [source-test-scene]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/tests/scene/test_scene.cpp>
 [reading-game-engine-architecture]: <https://www.gameenginebook.com/>
 [reading-foundations]: <https://foundationsofgameenginedev.com/#fged1>
-[reading-gltf-scenes]: <https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes-and-nodes>
+[reading-gltf-scenes]: <https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes>
 [reading-page]: {% link _tabs/reading.md %}

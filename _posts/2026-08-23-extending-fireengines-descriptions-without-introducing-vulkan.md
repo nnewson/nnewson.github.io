@@ -8,54 +8,48 @@ description: >-
   descriptions while preserving fireEngine's explicit preparation boundary.
 release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.8"
 previous_release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.7"
-source_commit_url: "https://github.com/nnewson/fireEngine-tutorial/commit/658f2bfc61ab282075709d736eebb5672e324cfb"
-previous_source_commit_url: "https://github.com/nnewson/fireEngine-tutorial/commit/d75c3d669fde4e5392be19b44b10a4e9d2062114"
 ---
 
-The first release 0.8 implementation step gave fireEngine enough mathematical
-and scene vocabulary for imported content. Nodes now retain decomposed
-translation, rotation, and scale; quaternions can be normalised and
-interpolated; and stable scene-local IDs give future animation a target that
-survives traversal.
+Release 0.8 gives fireEngine enough mathematical and scene vocabulary for
+imported content. Nodes retain decomposed translation, rotation, and scale;
+quaternions can be normalised and interpolated; and scene-local IDs provide
+stable lookup across traversal.
 
-The next step has to describe what a textured, animated scene contains without
-prematurely deciding how Vulkan will represent it. Decoded pixels are not yet a
-`VkImage`. Filtering and wrapping policy are not yet a `VkSampler`. A material's
-base-colour texture is not yet a descriptor set. An animation curve is neither
-a scene node nor a per-frame command.
+The same release must describe what a textured, animated scene contains without
+letting Vulkan own that meaning. Decoded pixels are not a `VkImage`. Filtering
+and wrapping policy are not a `VkSampler`. A material's base-colour texture is
+not a descriptor set. An animation curve is neither a scene node nor a
+per-frame command.
 
-This checkpoint extends the CPU-owned side of the architecture with those
-distinctions. `RenderAssets` gains images and textures, preparation follows
-their transitive relationships, reusable animation channels remain separate
-from node-local playback state, and each scene node receives one explicit
-component role.
+This article examines the CPU-owned side of that architecture. `RenderAssets`
+owns images and textures, preparation follows their transitive relationships,
+reusable animation channels remain separate from node-local playback state,
+and each scene node receives one explicit component role.
 
-The rendered subject does not change. The tutorial still draws its coloured
-triangle, the shader still ignores the new texture coordinate, and there is no
-glTF loader or animation playback yet. That is deliberate: this part defines
-and tests the descriptions that later loader and renderer work will consume.
+The completed release loads, animates, textures, and renders AnimatedCube. This
+post deliberately stops at the description boundary: the loader, playback
+system, and renderer are consumers of these types, not evidence that Vulkan or
+glTF belongs inside them.
 
 This is the second detailed post based on release 0.8. The
 [architectural overview][planning-post] describes the complete path to
 AnimatedCube, while the [previous walkthrough][transform-post] covers the
 transform and identity vocabulary on which this step builds.
 
-> Starting point: [TRS transforms and stable node identities][previous-source-commit]
+> Code for this article: [fireEngine 0.8][release-0-8]
 >
-> Source checkpoint: [Add composable animation and texture asset descriptions][source-commit]
+> Previous release: [fireEngine 0.7][release-0-7]
 >
-> Release destination: [fireEngine 0.8][release-0-8]
->
-> This walkthrough stays at the second non-merge commit after
-> [fireEngine 0.7][release-0-7]. It adds descriptions and validation, but does
-> not include the later glTF loader, texture upload, or animation playback.
+> The [previous walkthrough][transform-post] covers the maths and scene
+> vocabulary used here. This one concentrates on the Vulkan-free descriptions
+> that loading, playback, preparation, and rendering share in version 0.8.
 {: .prompt-info }
 
 ## Grow the description side of the boundary
 
 Release 0.7 already separated reusable render descriptions from scene
-instances and renderer-owned Vulkan resources. This checkpoint grows that
-model in two directions:
+instances and renderer-owned Vulkan resources. Release 0.8 grows that model in
+two directions:
 
 <!-- align: ignore R1 -->
 ```text
@@ -74,14 +68,14 @@ RenderAssets                         animations
                        SceneNode
 ```
 
-The asset catalogue owns durable rendering descriptions. Animations remain an
-external reusable collection until a later format-neutral `SceneContent` type
-groups them with the assets and scene. A scene node stores either a renderable
-reference, an animation binding, or no component at all.
+The asset catalogue owns durable rendering descriptions. `SceneContent` groups
+the external reusable animation collection with the assets and scene. A scene
+node stores either a renderable reference, an animation binding, or no
+component at all.
 
 None of these public types includes a Vulkan header. They can be created by a
-procedural builder, populated by a future importer, validated in unit tests,
-and inspected without a window or graphics device.
+procedural builder, populated by `GltfLoader`, validated in unit tests, and
+inspected without a window or graphics device.
 
 The main new and changed files are:
 
@@ -136,8 +130,8 @@ struct ImageData
 
 The byte vector is tightly packed, row-major RGBA8. It does not retain a PNG
 file, a decoder object, a Vulkan format, device memory, an image layout, or an
-image view. Decoding will belong to the loader; compiling those bytes into a
-sampled GPU image will belong to the renderer.
+image view. Decoding belongs to the loader; compiling those bytes into a
+sampled GPU image belongs to the renderer.
 
 See [`image_data.hpp`][source-image-data].
 
@@ -183,10 +177,10 @@ enum class TextureWrap : std::uint8_t
 ```
 
 They deliberately are not aliases for `VkFilter` or
-`VkSamplerAddressMode`. A later compilation step will translate the engine's
-meaning into Vulkan values. Mipmap selection, anisotropy, comparison sampling,
-and border colours stay out of this checkpoint because no demonstrated content
-requires them yet.
+`VkSamplerAddressMode`. Renderer compilation translates the engine's meaning
+into Vulkan values. Mipmap selection, anisotropy, comparison sampling, and
+border colours stay out of release 0.8 because its demonstrated content does
+not require them.
 
 See [`texture.hpp`][source-texture].
 
@@ -203,12 +197,13 @@ struct Material
 };
 ```
 
-The optional preserves the existing untextured path. Absence is part of the
-description rather than a fabricated invalid texture ID or a renderer-owned
-fallback leaking into application data. A later renderer step can compile both
-cases into one descriptor layout using a neutral white texture.
+The optional preserves the untextured path. Absence is part of the description
+rather than a fabricated invalid texture ID or a renderer-owned fallback
+leaking into application data. The 0.8 renderer compiles both cases into one
+descriptor layout using a neutral white texture.
 
-The vertex description gains the `Vec2` introduced by the previous checkpoint:
+The vertex description uses the `Vec2` covered by the
+[transforms post][transform-post]:
 
 ```cpp
 struct Vertex
@@ -219,15 +214,13 @@ struct Vertex
 };
 ```
 
-The attribute exists before the pipeline consumes it. The static layout check
-is updated from seven floats to nine, but the current Vulkan attribute list and
-shader still read only position and colour. The triangle supplies zero texture
-coordinates and its material supplies no texture, so the visual integration
-path keeps the same meaning.
+The static layout check covers nine floats. The 0.8 pipeline binds position,
+colour, and texture coordinates, and the scene shader samples the selected
+texture before multiplying it by the material and vertex factors.
 
-This is a useful sequencing property. The public description can settle before
-image allocation, descriptors, shader sampling, and synchronization arrive in
-one much larger renderer change.
+The architectural separation still matters: the public vertex description
+does not depend on image allocation, descriptors, shader modules, or
+synchronisation even though the renderer consumes it.
 
 See [`material.hpp`][source-material], [`vertex.hpp`][source-vertex], and the
 current [`pipeline.cpp`][source-pipeline].
@@ -298,12 +291,12 @@ textures alongside the existing mesh, material, and render-object operations:
 [[nodiscard]] const std::vector<Texture>& textures() const noexcept;
 ```
 
-Every insertion advances the same asset revision. Images and textures may not
-be compiled by the renderer at this checkpoint, but changing the catalogue is
-already visible to `RenderPreparation`. Move construction and move assignment
-also transfer the new collections while changing the moved-from object's
-revision so an existing address-and-revision cache cannot mistake moved state
-for unchanged input.
+Every insertion advances the same asset revision. The renderer compiles images
+and textures selected by `RenderPreparation`; changing the catalogue therefore
+invalidates the plan even when scene transforms stay unchanged. Move
+construction and move assignment also transfer the new collections while
+changing the moved-from object's revision so an existing
+address-and-revision cache cannot mistake moved state for unchanged input.
 
 The ownership rule remains simple: an ID is meaningful only with the
 `RenderAssets` instance that assigned it. It is a typed local handle, not a
@@ -406,9 +399,9 @@ share one `ImageId`. Both sampling descriptions appear in `plan.textures`, but
 the decoded pixels appear once in `plan.images`. Unused images and textures do
 not enter the plan at all.
 
-The renderer does not compile these two new lists yet. Their presence makes the
-preparation contract complete before the later Vulkan texture step consumes
-it, just as the CPU asset types arrived before their device representation.
+`CompiledResources` consumes these two lists to allocate and upload only the
+selected images and textures. Preparation itself remains Vulkan-free: it names
+the work without deciding how the renderer represents it.
 
 See [`render_preparation.hpp`][source-render-preparation] and
 [`render_preparation.cpp`][source-render-preparation-cpp].
@@ -463,7 +456,7 @@ struct Animation
 
 An animation owns a stable ordered collection of channels and an optional
 diagnostic name. Each channel contains strictly increasing times in seconds and
-one quaternion value for each time. The checkpoint intentionally supports only
+one quaternion value for each time. Release 0.8 intentionally supports only
 linear rotation data; translation, scale, morph weights, cubic splines, and
 step interpolation need different value or interpolation contracts and remain
 outside the selected vertical slice.
@@ -505,13 +498,14 @@ property will be driven, and owns its playback state. Two animators can refer
 to the same channel while holding different times or looping choices. The
 sample values stay shared; runtime state belongs to each use.
 
-There is still no sampling operation in this checkpoint. `playbackTime` does
-not advance, timestamps are not searched, and no quaternion is written to a
-node's `Transform`. Defining the binding first lets later playback depend on a
-small validated contract instead of inventing animation ownership during the
-frame loop.
+`Animator` does not sample its own channel. The separate
+`advanceAnimations()` operation advances `playbackTime`, locates the surrounding
+samples, interpolates the rotation, and writes it to the node's `Transform`.
+Keeping that behaviour outside the binding prevents reusable curve data from
+owning frame-loop policy.
 
-See [`animator.hpp`][source-animator].
+See [`animator.hpp`][source-animator] and
+[`animation_playback.cpp`][source-animation-playback].
 
 ## Give every scene node one explicit component role
 
@@ -581,9 +575,8 @@ animated source node -> Animator
 ```
 
 One animation binding affects every primitive through the existing hierarchy,
-and each primitive can retain its own mesh/material relationship. The loader
-that creates this structure arrives later; this checkpoint proves that the
-scene representation can already express it.
+and each primitive can retain its own mesh/material relationship. `GltfLoader`
+creates exactly this structure when it imports a mesh-bearing animated node.
 
 The trade-off is intentionally narrow. A node cannot directly hold several
 behaviours or several animation channels. The selected AnimatedCube path needs
@@ -603,9 +596,9 @@ a scene:
 - every quaternion is finite and non-zero, and can therefore be normalised.
 
 The validator does not require stored quaternion samples to have unit length.
-It requires them to be normalisable, allowing the later interpolation operation
-to produce a unit result through the robust quaternion contract introduced in
-the previous step.
+It requires them to be normalisable, allowing playback interpolation to produce
+a unit result through the robust quaternion contract covered in the
+[transforms post][transform-post].
 
 `detail::validateAnimationBindings()` composes those animations with a scene.
 It first validates every reusable animation, then walks every root and
@@ -633,27 +626,25 @@ See [`animation_validation.hpp`][source-animation-validation] and
 
 ## Keep implementation helpers visibly internal
 
-The checkpoint also moves existing debug, hash, and logging support beneath
+Release 0.8 also keeps existing debug, hash, and logging support beneath
 `core/detail/` and places the debug helpers in `fire_engine::detail`. This does
-not change the triangle or the new description model, but it corrects a public
-header boundary exposed by the growing include tree.
+not change the description model, but it keeps implementation helpers out of
+the supported public surface.
 
 `log()` remains public; its `LogMessage` implementation helper moves to
 `core/detail/log_message.hpp`. Scene hashing includes the internal hash
 constants from `core/detail/hash.hpp`, and device setup includes the internal
 debug declarations from `core/detail/debug.hpp`.
 
-That small cleanup prepares for the next release 0.8 checkpoint, which makes
-the renderer's public/internal boundary systematic. Here it ensures the new
-public description headers do not suggest that unrelated implementation helpers
-are supported engine API. Animation validation follows the same rule beneath
-`animation/detail/`.
+The new public description headers therefore do not suggest that unrelated
+implementation helpers are supported engine API. Animation validation follows
+the same rule beneath `animation/detail/`.
 
-## Preserve the procedural triangle
+## Preserve procedural and untextured producers
 
-The application migrates to the new descriptions without pretending to use
-features that are not implemented yet. Each vertex receives an empty texture
-coordinate, and the material explicitly contains no base-colour texture:
+The normal 0.8 application loads AnimatedCube, but the description model does
+not require glTF or a texture. Procedural code can still supply vertices
+directly, and a material can explicitly contain no base-colour texture:
 
 ```cpp
 fire_engine::Vertex{
@@ -675,16 +666,18 @@ an optional render-object setter:
 node.component(triangle);
 ```
 
-Those are structural migrations, not visual changes. `Renderer::prepare()`
-still validates and compiles the triangle's mesh and material, while
-`drawFrame()` consumes the scene's current draw items exactly as before.
+`Renderer::prepare()` validates and compiles either producer through the same
+asset graph. The release's untextured smoke scenario uses the imported cube's
+mesh with a material whose missing texture selects the persistent white
+fallback, proving that absence remains a supported description rather than a
+special draw path.
 
-See the checkpoint's [`main.cpp`][source-main].
+See the release's [`main.cpp`][source-main].
 
 ## Test descriptions and composition without a device
 
-The device-free Catch2 count rises from 29 to 38. Nine new cases cover the
-contracts introduced by this checkpoint.
+Focused device-free Catch2 cases cover these description and composition
+contracts.
 
 Asset tests reject zero image extents, incorrect RGBA8 byte counts, invalid and
 out-of-range image references, and invalid and out-of-range material texture
@@ -720,8 +713,8 @@ See [`test_asset_validation.cpp`][source-test-assets],
 
 ## Run the description and composition tests
 
-Configure and build the source checkpoint through the vcpkg preset, then ask
-CTest for the nine new cases by anchored prefix:
+Configure and build release 0.8 through the vcpkg preset, then ask CTest for
+nine focused cases by anchored prefix:
 
 ```shell
 cmake --preset vcpkg
@@ -729,10 +722,10 @@ cmake --build --preset default
 ctest --preset default -R "^(Asset validation rejects malformed images|Asset validation rejects missing texture resources|Render preparation extracts shared image and texture dependencies|Image and texture additions invalidate render preparation|Animation validation accepts|Animation validation rejects|Animation binding validation accepts|Animation binding validation rejects|Scene components separate)"
 ```
 
-The remaining maths, scene, asset, preparation, swapchain, and SPIR-V tests,
-plus the Vulkan smoke test, remain outside this focused run. Running the full
-CTest preset verifies that the wider triangle path still behaves as it did at
-the previous checkpoint.
+The remaining maths, scene, asset, loading, playback, rendering, and Vulkan
+scenarios remain outside this focused run. Running the full CTest preset also
+exercises AnimatedCube, repeated preparation, the untextured fallback, and
+presentation recreation.
 
 ## Diagnose the new failure boundaries
 
@@ -801,8 +794,8 @@ is not supported application API or intended as per-frame defensive work.
 
 ## What this part of release 0.8 gives us
 
-The second implementation checkpoint extends fireEngine's source-side model
-without crossing its Vulkan boundary:
+This part of release 0.8 extends fireEngine's source-side model without crossing
+its Vulkan boundary:
 
 - `ImageData` owns tightly packed decoded RGBA8 pixels and explicit dimensions;
 - image content remains separate from texture sampling behaviour;
@@ -810,7 +803,7 @@ without crossing its Vulkan boundary:
 - `ImageId` and `TextureId` extend the typed dense-handle pattern;
 - materials gain an optional base-colour texture without losing the untextured
   path;
-- vertices gain one texture-coordinate pair before the shader consumes it;
+- vertices carry the texture-coordinate pair consumed by the shader;
 - `RenderAssets` owns images and textures beside meshes, materials, and render
   objects;
 - all asset insertions participate in the existing revision contract;
@@ -828,16 +821,16 @@ without crossing its Vulkan boundary:
 - hierarchy composes one animated source node with one or more renderable
   primitive children;
 - curve validation remains separate from scene-binding validation;
-- core implementation helpers move beneath a visible `detail/` boundary;
-- nine new device-free cases bring the checkpoint total to 38; and
-- the procedural triangle preserves the previous runtime behaviour through the
-  expanded descriptions.
+- core implementation helpers remain beneath a visible `detail/` boundary;
+- focused device-free cases exercise the descriptions and their composition;
+  and
+- procedural, imported, textured, and untextured content share the same public
+  model.
 
-There is still no file format, decoded PNG loader, GPU image, sampler,
-descriptor, texture-sampling shader, or playback loop. The next architectural
-checkpoint tightens the renderer's public/internal boundary; the later loader
-and compilation steps can then consume these descriptions without making glTF
-or Vulkan their owner.
+The loader, texture compiler, shader, and playback loop in release 0.8 consume
+these descriptions without becoming their owner. The
+[next walkthrough][scene-content-post] concentrates on `SceneContent` and the
+constrained glTF loader that populates it.
 
 ## Recommended reading
 
@@ -858,34 +851,34 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 
 [release-0-7]: {{ page.previous_release_url }}
 [release-0-8]: {{ page.release_url }}
-[source-commit]: {{ page.source_commit_url }}
-[previous-source-commit]: {{ page.previous_source_commit_url }}
 [planning-post]: {% post_url 2026-08-20-growing-fireengine-into-an-animated-gltf-renderer %}
 [transform-post]: {% post_url 2026-08-22-giving-fireengine-imported-transforms-enough-vocabulary %}
-[source-image-data]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/graphics/image_data.hpp>
-[source-texture]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/graphics/texture.hpp>
-[source-material]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/graphics/material.hpp>
-[source-vertex]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/graphics/vertex.hpp>
-[source-pipeline]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/src/render/pipeline.cpp>
-[source-render-ids]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/graphics/render_ids.hpp>
-[source-render-assets]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/graphics/render_assets.hpp>
-[source-render-assets-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/src/graphics/render_assets.cpp>
-[source-asset-validation]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/src/graphics/asset_validation.cpp>
-[source-render-preparation]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/graphics/render_preparation.hpp>
-[source-render-preparation-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/src/graphics/render_preparation.cpp>
-[source-animation]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/animation/animation.hpp>
-[source-animation-ids]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/animation/animation_ids.hpp>
-[source-animator]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/scene/animator.hpp>
-[source-components]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/scene/components.hpp>
-[source-scene-node]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/scene/scene_node.hpp>
-[source-scene-node-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/src/scene/scene_node.cpp>
-[source-animation-validation]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/include/fire_engine/animation/detail/animation_validation.hpp>
-[source-animation-validation-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/src/animation/animation_validation.cpp>
-[source-main]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/src/main.cpp>
-[source-test-assets]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/tests/graphics/test_asset_validation.cpp>
-[source-test-preparation]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/tests/graphics/test_render_preparation.cpp>
-[source-test-animation]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/tests/animation/test_animation_validation.cpp>
-[source-test-scene]: <https://github.com/nnewson/fireEngine-tutorial/blob/658f2bfc61ab282075709d736eebb5672e324cfb/tests/scene/test_scene.cpp>
+[scene-content-post]: {% post_url 2026-08-27-introducing-format-neutral-scene-content-to-fireengine %}
+[source-image-data]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/graphics/image_data.hpp>
+[source-texture]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/graphics/texture.hpp>
+[source-material]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/graphics/material.hpp>
+[source-vertex]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/graphics/vertex.hpp>
+[source-pipeline]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/render/pipeline.cpp>
+[source-render-ids]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/graphics/render_ids.hpp>
+[source-render-assets]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/graphics/render_assets.hpp>
+[source-render-assets-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/graphics/render_assets.cpp>
+[source-asset-validation]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/graphics/asset_validation.cpp>
+[source-render-preparation]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/graphics/render_preparation.hpp>
+[source-render-preparation-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/graphics/render_preparation.cpp>
+[source-animation]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/animation/animation.hpp>
+[source-animation-ids]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/animation/animation_ids.hpp>
+[source-animator]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/scene/animator.hpp>
+[source-animation-playback]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/animation/animation_playback.cpp>
+[source-components]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/scene/components.hpp>
+[source-scene-node]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/scene/scene_node.hpp>
+[source-scene-node-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/scene/scene_node.cpp>
+[source-animation-validation]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/animation/detail/animation_validation.hpp>
+[source-animation-validation-cpp]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/animation/animation_validation.cpp>
+[source-main]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/main.cpp>
+[source-test-assets]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/tests/graphics/test_asset_validation.cpp>
+[source-test-preparation]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/tests/graphics/test_render_preparation.cpp>
+[source-test-animation]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/tests/animation/test_animation_validation.cpp>
+[source-test-scene]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/tests/scene/test_scene.cpp>
 [reading-game-engine-architecture]: <https://www.gameenginebook.com/>
 [reading-gltf-textures]: <https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#textures>
 [reading-gltf-animations]: <https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#animations>
