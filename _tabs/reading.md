@@ -111,16 +111,36 @@ buffer layouts.
 A compact, code-first tutorial that builds a modern Vulkan 1.3 renderer while
 explaining how its major systems fit together.
 
+### [Slang `Sample` reference](https://docs.shader-slang.org/en/stable/external/core-module-reference/types/0texture-01/sample-0.html)
+
+The Slang core-module reference for filtered texture sampling with an implicit
+level of detail, as used by fireEngine's fragment shader.
+
 ### [vcpkg documentation](https://learn.microsoft.com/en-gb/vcpkg/)
 
 The official reference for the cross-platform C and C++ package manager used by
 the tutorial, covering manifests, registries, versioning, and CMake integration.
+
+### [Vulkan Guide: Image Copies](https://docs.vulkan.org/guide/latest/image_copies.html)
+
+The Khronos guide to copying between buffers and images, including subresource
+selection, tightly packed data, row length, image height, and copy extents.
+
+### [Vulkan Guide: Synchronization Examples](https://docs.vulkan.org/guide/latest/synchronization_examples.html)
+
+Worked Synchronization 2 examples for image layout transitions, transfer
+operations, and making uploaded data visible to later shader reads.
 
 ### [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
 
 AMD's open-source allocation library for Vulkan, with documentation and examples
 covering memory-type selection, suballocation, resource creation, and allocator
 configuration.
+
+### [Vulkan specification: Push Descriptors](https://docs.vulkan.org/spec/latest/chapters/descriptorsets.html)
+
+The normative definition of push-descriptor layouts and commands, including
+the lifetime of descriptor contents recorded directly into a command buffer.
 
 ### [Your first Slang shader](https://shader-slang.org/docs/first-slang-shader)
 

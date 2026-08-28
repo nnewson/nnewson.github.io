@@ -191,13 +191,11 @@ Validation at the loader boundary will not replace preparation validation. The
 loader must prove that its composed result is internally complete; the renderer
 must remain safe when content comes from any producer.
 
-## Support a deliberately narrow glTF slice
-
-The first loader should say exactly what it accepts. Release 0.8 will focus on
-JSON `.gltf` files with external local buffers and PNG images, one selected
-scene, reachable TRS nodes, indexed triangle primitives, positions, one set of
-texture coordinates, base-colour materials, samplers, and linear rotation
-animation.
+The first producer of that result will be a deliberately narrow glTF loader,
+and it should say exactly what it accepts. Release 0.8 will focus on JSON
+`.gltf` files with external local buffers and PNG images, one selected scene,
+reachable TRS nodes, indexed triangle primitives, positions, one set of texture
+coordinates, base-colour materials, samplers, and linear rotation animation.
 
 Accessor extraction must respect accessor offsets, buffer-view offsets, and
 interleaved byte strides. Both unsigned 16-bit and unsigned 32-bit indices will
