@@ -89,6 +89,11 @@ The Khronos definitions of binary storage, byte ranges, interleaved stride,
 typed accessors, and sparse data used when translating glTF geometry and
 animation samples.
 
+### [glTF 2.0 specification: Meshes](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#meshes)
+
+The Khronos definitions of mesh primitives, topology, counter-clockwise
+winding, and the way mirrored node transforms reverse triangle facing.
+
 ### [glTF 2.0 specification: Scenes and Nodes](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes)
 
 The Khronos definition of scenes, ordered root nodes, child hierarchies, and
@@ -115,6 +120,21 @@ explaining how its major systems fit together.
 
 The official reference for the cross-platform C and C++ package manager used by
 the tutorial, covering manifests, registries, versioning, and CMake integration.
+
+### [`VkFrontFace` reference](https://docs.vulkan.org/refpages/latest/refpages/source/VkFrontFace.html)
+
+The Vulkan reference definition of clockwise and counter-clockwise front faces
+after projection into framebuffer coordinates.
+
+### [Vulkan Guide: Depth](https://docs.vulkan.org/guide/latest/depth.html)
+
+The Khronos guide to depth formats, image aspects, layouts, fixed-function
+testing, comparisons, and attachment writes.
+
+### [Vulkan specification: Fixed-Function Vertex Post-Processing](https://docs.vulkan.org/spec/latest/chapters/vertexpostproc.html)
+
+The normative path from clip coordinates through perspective division,
+clipping, and viewport transformation into rasterization.
 
 ### [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
 
