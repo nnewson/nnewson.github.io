@@ -1,10 +1,10 @@
 ---
-title: "fireEngine vX.Y.Z: Release title"
+title: "<project> X.Y: Release title"
 date: 2026-07-27 00:00:00 +0100
-categories: [fireEngine, Releases]
-tags: [fireengine, release]
-description: "A one-sentence summary of what this fireEngine release adds."
-release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/vX.Y.Z"
+categories: [<project>, Releases]
+tags: [<project>, release]
+description: "A one-sentence summary of what this release adds."
+release_url: "https://github.com/nnewson/<repo>/releases/tag/X.Y"
 ---
 
 ## Release goal
@@ -12,7 +12,7 @@ release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/vX.Y.Z
 What should readers be able to see, understand, or build by the end of this
 release?
 
-> Source: [fireEngine vX.Y.Z]({{ page.release_url }})
+> Source: [<project> X.Y]({{ page.release_url }})
 {: .prompt-info }
 
 ## What changed
@@ -24,8 +24,8 @@ Summarise the user-visible and architectural changes.
 Explain the important design and implementation details. Prefer focused code
 snippets linked back to their complete source.
 
-```cpp
-// A small, representative example.
+```text
+A small, representative example, in the project's language.
 ```
 
 ## Problems and trade-offs
@@ -37,9 +37,9 @@ Record the difficult bugs, rejected approaches, measurements, and compromises.
 Add the commands required to check out, build, and run the tagged version.
 
 ```shell
-git clone https://github.com/nnewson/fireEngine-tutorial.git
-cd fireEngine-tutorial
-git checkout vX.Y.Z
+git clone https://github.com/nnewson/<repo>.git
+cd <repo>
+git checkout X.Y
 ```
 
 ## What comes next
