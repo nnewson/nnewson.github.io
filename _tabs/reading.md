@@ -51,11 +51,21 @@ synchronization, and presentation.
 
 ## Websites
 
+### [C++ `std::chrono::steady_clock`](https://en.cppreference.com/w/cpp/chrono/steady_clock)
+
+The cppreference entry for the monotonic clock used to measure elapsed frame
+time without being affected by changes to the system wall clock.
+
 ### [C++ `std::expected`](https://en.cppreference.com/w/cpp/utility/expected.html)
 
 The cppreference language-library entry for the C++23 vocabulary type that
 represents either an expected value or a recoverable error without requiring an
 exception.
+
+### [C++ `std::ranges::upper_bound`](https://en.cppreference.com/w/cpp/algorithm/upper_bound)
+
+The cppreference algorithms entry covering the ordered search used to find the
+first animation keyframe strictly after a playback time.
 
 ### [C++ subscript operator](https://en.cppreference.com/w/cpp/language/operators.html#Array_subscript_operator)
 
@@ -110,6 +120,11 @@ used to describe sampled surface colour.
 The C++ glTF parsing library used behind fireEngine's format-specific loading
 boundary, including helpers for traversing accessors without assuming packed
 buffer layouts.
+
+### [Fix Your Timestep!](https://gafferongames.com/post/fix_your_timestep/)
+
+Glenn Fiedler's explanation of fixed, variable, and semi-fixed simulation
+steps, and why elapsed-time policy matters as a real-time update loop grows.
 
 ### [How to Vulkan](https://howtovulkan.com)
 
