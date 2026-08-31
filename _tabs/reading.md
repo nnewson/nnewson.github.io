@@ -146,6 +146,18 @@ the tutorial, covering manifests, registries, versioning, and CMake integration.
 The Vulkan reference definition of clockwise and counter-clockwise front faces
 after projection into framebuffer coordinates.
 
+### [`VK_KHR_swapchain_maintenance1` reference](https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_swapchain_maintenance1.html)
+
+The Vulkan extension reference for presentation fences, explicit image release,
+and other facilities that make swapchain lifetime and replacement easier to
+control.
+
+### [`VkSwapchainPresentFenceInfoKHR` reference](https://docs.vulkan.org/refpages/latest/refpages/source/VkSwapchainPresentFenceInfoKHR.html)
+
+The Vulkan reference for associating fences with presentation operations so an
+application can determine when related presentation resources may be safely
+recycled.
+
 ### [Vulkan Guide: Depth](https://docs.vulkan.org/guide/latest/depth.html)
 
 The Khronos guide to depth formats, image aspects, layouts, fixed-function
@@ -155,6 +167,12 @@ testing, comparisons, and attachment writes.
 
 The Khronos guide to copying between buffers and images, including subresource
 selection, tightly packed data, row length, image height, and copy extents.
+
+### [Vulkan Guide: Swapchain Semaphore Reuse](https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html)
+
+The Khronos guide to indexing presentation wait semaphores by acquired
+swapchain image rather than frame slot, preventing unsafe binary-semaphore
+reuse.
 
 ### [Vulkan Guide: Synchronization Examples](https://docs.vulkan.org/guide/latest/synchronization_examples.html)
 
@@ -176,6 +194,11 @@ clipping, and viewport transformation into rasterization.
 
 The normative definition of push-descriptor layouts and commands, including
 the lifetime of descriptor contents recorded directly into a command buffer.
+
+### [Vulkan specification: Window System Integration](https://docs.vulkan.org/spec/latest/chapters/VK_KHR_surface/wsi.html)
+
+The normative definition of surfaces, swapchains, image acquisition,
+presentation, and the lifetime rules governing window-system resources.
 
 ### [Your first Slang shader](https://shader-slang.org/docs/first-slang-shader)
 
