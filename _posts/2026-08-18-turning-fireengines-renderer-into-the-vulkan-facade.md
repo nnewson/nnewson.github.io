@@ -2,7 +2,7 @@
 title: "Turning fireEngine's renderer into the Vulkan facade"
 date: 2026-08-18 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, rendering, vulkan, architecture, command-buffers, shaders, pimpl, cpp]
+tags: [fireengine, "0.7", rendering, vulkan, architecture, command-buffers, shaders, pimpl, cpp]
 description: >-
   Hide fireEngine's Vulkan ownership behind Renderer, compile prepared scene
   assets into indexed GPU resources, and draw current instances explicitly.

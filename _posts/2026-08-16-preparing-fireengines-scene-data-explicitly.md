@@ -2,7 +2,7 @@
 title: "Preparing fireEngine's scene data explicitly"
 date: 2026-08-16 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, rendering, preparation, caching, assets, scene-graph, architecture, cpp]
+tags: [fireengine, "0.7", rendering, preparation, caching, assets, scene-graph, architecture, cpp]
 description: >-
   Validate fireEngine's render assets, select the subset required by a scene,
   and cache a Vulkan-free preparation plan across transform-only changes.

@@ -2,7 +2,7 @@
 title: Giving fireEngine a small maths vocabulary
 date: 2026-08-10 08:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, maths, vectors, matrices, transforms, scene-graph, cpp]
+tags: [fireengine, "0.7", maths, vectors, matrices, transforms, scene-graph, cpp]
 description: >-
   Add small Vec3, Vec4, and column-major Mat4 types so fireEngine can describe,
   compose, test, and upload its first scene transforms without Vulkan types.

@@ -2,7 +2,7 @@
 title: "Giving fireEngine's imported transforms enough vocabulary"
 date: 2026-08-22 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, maths, transforms, quaternions, scene-graph, gltf, cpp]
+tags: [fireengine, "0.8", maths, transforms, quaternions, scene-graph, gltf, cpp]
 description: >-
   Extend fireEngine with robust vector normalisation, quaternion rotation,
   decomposed TRS transforms, Vulkan camera matrices, and stable scene-node IDs.

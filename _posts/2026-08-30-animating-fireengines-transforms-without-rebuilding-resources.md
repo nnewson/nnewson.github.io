@@ -2,7 +2,7 @@
 title: "Animating fireEngine's transforms without rebuilding resources"
 date: 2026-08-30 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, animation, transforms, quaternions, scene-graph, caching, gltf, cpp]
+tags: [fireengine, "0.8", animation, transforms, quaternions, scene-graph, caching, gltf, cpp]
 description: >-
   Advance imported rotation channels into current scene transforms while
   keeping render preparation and compiled GPU resources unchanged.

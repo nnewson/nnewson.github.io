@@ -2,7 +2,7 @@
 title: "Adding a camera, depth, and culling to fireEngine"
 date: 2026-08-29 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, vulkan, camera, depth, culling, rendering, matrices, gltf]
+tags: [fireengine, "0.8", vulkan, camera, depth, culling, rendering, matrices, gltf]
 description: >-
   Turn fireEngine's textured scene into a coherent opaque 3D path with a
   Vulkan projection, an extent-matched depth attachment, and correct culling.

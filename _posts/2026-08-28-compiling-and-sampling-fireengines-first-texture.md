@@ -2,7 +2,7 @@
 title: "Compiling and sampling fireEngine's first texture"
 date: 2026-08-28 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, vulkan, textures, rendering, synchronization, shaders, vma, assets]
+tags: [fireengine, "0.8", vulkan, textures, rendering, synchronization, shaders, vma, assets]
 description: >-
   Compile selected RGBA8 descriptions into device-local Vulkan images and
   samplers, upload them safely, and bind one base-colour texture per draw.

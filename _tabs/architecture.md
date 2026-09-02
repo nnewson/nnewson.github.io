@@ -11,3 +11,4 @@ architecture is too simple to warrant a separate reference.
 
 - [fireEngine 0.7 architecture]({% link _architecture/0.7.md %})
 - [fireEngine 0.8 architecture]({% link _architecture/0.8.md %})
+- [fireEngine 0.9 architecture]({% link _architecture/0.9.md %})

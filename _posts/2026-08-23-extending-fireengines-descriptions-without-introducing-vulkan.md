@@ -2,7 +2,7 @@
 title: "Extending fireEngine's descriptions without introducing Vulkan"
 date: 2026-08-23 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, assets, textures, animation, scene-graph, architecture, gltf, cpp]
+tags: [fireengine, "0.8", assets, textures, animation, scene-graph, architecture, gltf, cpp]
 description: >-
   Add Vulkan-free image, texture, material, animation, and scene-component
   descriptions while preserving fireEngine's explicit preparation boundary.

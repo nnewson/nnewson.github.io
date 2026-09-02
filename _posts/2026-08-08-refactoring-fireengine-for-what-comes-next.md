@@ -2,7 +2,7 @@
 title: Refactoring fireEngine for what comes next
 date: 2026-08-08 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, 3d-engine, architecture, refactoring, testing, scene-graph, cpp]
+tags: [fireengine, "0.7", 3d-engine, architecture, refactoring, testing, scene-graph, cpp]
 description: >-
   A high-level plan for turning fireEngine's first triangle into a testable,
   Vulkan-free scene and rendering architecture that can grow with the tutorial.
@@ -24,6 +24,8 @@ separate application data, scene state, render preparation, and Vulkan work
 while the complete result is still small enough to understand.
 
 > Starting point: [fireEngine 0.6][release-0-6]
+>
+> Released architecture: [fireEngine 0.7 architecture][architecture-0-7]
 >
 > The [first-triangle post][triangle-post] covers the rendering path we are
 > about to restructure. This is a planning post rather than a release
@@ -58,6 +60,8 @@ single large renderer rewrite.
 
 ## Build an engine that can be tested without a GPU
 
+The completed work is covered in the [testing post][testing-post].
+
 The first post will separate the reusable engine code from the small
 application that owns `main()` and the event loop. That creates a natural place
 for fast unit tests alongside the existing one-frame Vulkan smoke test.
@@ -74,6 +78,8 @@ dependencies, or caching. Establishing the test boundary first lets those rules
 be verified as soon as they appear.
 
 ## Give scenes a small maths vocabulary
+
+The completed work is covered in the [maths post][maths-post].
 
 The next post will add only the maths needed to describe the first scene:
 three- and four-component vectors, a column-major matrix, and the operations
@@ -92,6 +98,8 @@ and harder to misuse.
 
 ## Describe render assets without Vulkan
 
+The completed work is covered in the [render-assets post][assets-post].
+
 Once the basic data types exist, a post will move the triangle out of the Vulkan
 renderer and describe it as ordinary application data.
 
@@ -107,6 +115,8 @@ It also creates a clear validation point for empty meshes, invalid indices, and
 missing relationships before Vulkan becomes involved.
 
 ## Build the first scene graph
+
+The completed work is covered in the [scene-graph post][scene-post].
 
 Render assets describe reusable things; a scene describes where instances of
 those things appear. The scene-graph post will introduce nodes with local and
@@ -125,6 +135,8 @@ reason to rebuild an otherwise unchanged GPU resource.
 
 ## Prepare scene data explicitly
 
+The completed work is covered in the [render-preparation post][preparation-post].
+
 There is still a gap between a Vulkan-free draw list and the resources a GPU can
 use. A dedicated render-preparation post will make that boundary explicit.
 
@@ -141,6 +153,8 @@ swapchain image, and world transforms, so they remain transient and are
 recorded each frame.
 
 ## Turn the renderer into the Vulkan facade
+
+The completed work is covered in the [renderer-facade post][renderer-post].
 
 The final refactoring post will bring the earlier boundaries together. The
 application will create a window, a renderer, render assets, and a scene; it
@@ -211,4 +225,11 @@ scene will be a content problem rather than another rewrite of the rendering
 architecture.
 
 [release-0-6]: https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.6
+[architecture-0-7]: {% link _architecture/0.7.md %}
 [triangle-post]: {% post_url 2026-08-05-rendering-fireengines-first-triangle %}
+[testing-post]: {% post_url 2026-08-09-testing-fireengine-without-a-gpu %}
+[maths-post]: {% post_url 2026-08-10-giving-fireengine-a-small-maths-vocabulary %}
+[assets-post]: {% post_url 2026-08-12-describing-fireengines-render-assets-without-vulkan %}
+[scene-post]: {% post_url 2026-08-14-building-fireengines-first-scene-graph %}
+[preparation-post]: {% post_url 2026-08-16-preparing-fireengines-scene-data-explicitly %}
+[renderer-post]: {% post_url 2026-08-18-turning-fireengines-renderer-into-the-vulkan-facade %}

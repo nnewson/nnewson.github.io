@@ -2,7 +2,7 @@
 title: Describing fireEngine's render assets without Vulkan
 date: 2026-08-12 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, rendering, assets, meshes, materials, type-safety, architecture, cpp]
+tags: [fireengine, "0.7", rendering, assets, meshes, materials, type-safety, architecture, cpp]
 description: >-
   Move fireEngine's vertices, indexed meshes, materials, render objects, and
   asset ownership into a typed CPU-side model with no Vulkan dependencies.
