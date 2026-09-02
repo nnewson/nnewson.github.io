@@ -2,7 +2,7 @@
 title: Growing fireEngine into an animated glTF renderer
 date: 2026-08-20 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, 3d-engine, architecture, gltf, textures, animation, rendering, cpp]
+tags: [fireengine, "0.8", 3d-engine, architecture, gltf, textures, animation, rendering, cpp]
 description: >-
   A high-level plan for taking fireEngine from a structured triangle to an
   imported, textured, animated glTF scene with replaceable presentation state.
@@ -37,6 +37,8 @@ large release walkthrough.
 > Starting point: [fireEngine 0.7][release-0-7]
 >
 > Target source: [fireEngine 0.8][release-0-8]
+>
+> Released architecture: [fireEngine 0.8 architecture][architecture-0-8]
 >
 > [Turning fireEngine's renderer into the Vulkan facade][renderer-facade-post]
 > completes the 0.7 architecture used here. Release 0.8 is fixed, but the exact
@@ -99,6 +101,8 @@ Keeping those reasons to change separate is the central goal of 0.8.
 
 ## Give imported transforms enough vocabulary
 
+The completed work is covered in the [transforms post][transforms-post].
+
 The 0.7 scene graph can translate and scale its triangle, but an imported scene
 needs a fuller transform model. The first part of the sequence will add the
 smallest mathematical vocabulary required by the selected content.
@@ -124,6 +128,8 @@ framebuffer Y direction explicitly, so later culling and shader code share one
 documented convention.
 
 ## Extend descriptions without introducing Vulkan
+
+The completed work is covered in the [descriptions post][descriptions-post].
 
 Textures and animations belong on the same side of the boundary as meshes and
 scene nodes.
@@ -164,6 +170,8 @@ animator parent with one renderable child per primitive, preserving the source
 hierarchy while supporting several primitives from one source mesh.
 
 ## Introduce format-neutral scene content
+
+The completed work is covered in the [scene-content post][scene-content-post].
 
 The loader needs one result that is useful beyond glTF. `SceneContent` will
 group the three application-owned collections that travel together:
@@ -215,6 +223,8 @@ vertical slice.
 
 ## Compile and sample the first texture
 
+The completed work is covered in the [texture-compilation post][texture-post].
+
 Decoded pixels are still only descriptions. Crossing the existing preparation
 boundary will turn them into renderer-owned resources.
 
@@ -246,6 +256,8 @@ a single unmipped texture is all that gets sampled.
 
 ## Add a camera, depth, and culling together
 
+The completed work is covered in the [visibility post][visibility-post].
+
 A rotating cube makes spatial mistakes visible in ways a single front-facing
 triangle cannot. It needs a perspective camera, hidden-surface removal, and a
 consistent winding convention.
@@ -267,6 +279,8 @@ to look right.
 
 ## Animate transforms without rebuilding resources
 
+The completed work is covered in the [animation post][animation-post].
+
 The imported rotation channel is the test that the 0.7 cache boundary was
 designed to pass.
 
@@ -285,6 +299,8 @@ without opening a window. The rendered scenario then proves that those CPU
 values reach the real shader path.
 
 ## Make presentation state replaceable
+
+The completed work is covered in the [presentation post][presentation-post].
 
 Release 0.7 reports resize, suboptimal, and out-of-date conditions but leaves
 recreation for later. Release 0.8 will make replacement a normal renderer
@@ -427,5 +443,13 @@ content reaches the renderer.
 
 [release-0-7]: {{ page.previous_release_url }}
 [release-0-8]: {{ page.release_url }}
+[architecture-0-8]: {% link _architecture/0.8.md %}
 [renderer-facade-post]: {% post_url 2026-08-18-turning-fireengines-renderer-into-the-vulkan-facade %}
+[transforms-post]: {% post_url 2026-08-22-giving-fireengine-imported-transforms-enough-vocabulary %}
+[descriptions-post]: {% post_url 2026-08-23-extending-fireengines-descriptions-without-introducing-vulkan %}
+[scene-content-post]: {% post_url 2026-08-27-introducing-format-neutral-scene-content-to-fireengine %}
+[texture-post]: {% post_url 2026-08-28-compiling-and-sampling-fireengines-first-texture %}
+[visibility-post]: {% post_url 2026-08-29-adding-camera-depth-and-culling-to-fireengine %}
+[animation-post]: {% post_url 2026-08-30-animating-fireengines-transforms-without-rebuilding-resources %}
+[presentation-post]: {% post_url 2026-08-31-making-fireengines-presentation-state-replaceable %}
 [animated-cube]: <https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/AnimatedCube>

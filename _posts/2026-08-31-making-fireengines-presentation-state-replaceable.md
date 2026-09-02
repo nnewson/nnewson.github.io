@@ -2,7 +2,7 @@
 title: "Making fireEngine's presentation state replaceable"
 date: 2026-08-31 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, vulkan, swapchain, presentation, synchronization, rendering, glfw, testing]
+tags: [fireengine, "0.8", vulkan, swapchain, presentation, synchronization, rendering, glfw, testing]
 description: >-
   Replace fireEngine's swapchain-compatible resources as one ownership group,
   retire presentation explicitly, and preserve compiled scene resources.

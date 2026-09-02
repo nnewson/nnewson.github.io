@@ -2,7 +2,7 @@
 title: "Introducing format-neutral scene content to fireEngine"
 date: 2026-08-27 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, gltf, assets, animation, scene-graph, architecture, cpp]
+tags: [fireengine, "0.8", gltf, assets, animation, scene-graph, architecture, cpp]
 description: >-
   Compose fireEngine's Vulkan-free scene data and import a deliberately narrow
   glTF slice without leaking the source format into the engine model.

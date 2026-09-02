@@ -2,7 +2,7 @@
 title: Testing fireEngine without a GPU
 date: 2026-08-09 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, testing, catch2, cmake, architecture, refactoring, cpp]
+tags: [fireengine, "0.7", testing, catch2, cmake, architecture, refactoring, cpp]
 description: >-
   Split fireEngine into reusable library, application, and Catch2 test targets,
   then test CPU-side decisions without opening a window or creating a GPU device.

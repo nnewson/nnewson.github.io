@@ -2,7 +2,7 @@
 title: "Building fireEngine's first scene graph"
 date: 2026-08-14 10:00:00 +0100
 categories: [fireEngine, Development]
-tags: [fireengine, scene-graph, hierarchy, transforms, rendering, architecture, cpp]
+tags: [fireengine, "0.7", scene-graph, hierarchy, transforms, rendering, architecture, cpp]
 description: >-
   Build a Vulkan-free scene graph that owns transformable nodes, resolves world
   transforms, and emits stable draw items for fireEngine's renderer.
