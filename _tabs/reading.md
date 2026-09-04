@@ -83,6 +83,16 @@ used to give a scene node one explicit component role.
 The official introduction to Catch2, covering test cases, assertions, sections,
 behaviour-driven aliases, and data- and type-driven tests.
 
+### [CTest `FAIL_REGULAR_EXPRESSION`](https://cmake.org/cmake/help/latest/prop_test/FAIL_REGULAR_EXPRESSION.html)
+
+The CMake test property that turns matching standard output or standard error
+into a failed test independently of the executable's exit code.
+
+### [CTest `RESOURCE_LOCK`](https://cmake.org/cmake/help/latest/prop_test/RESOURCE_LOCK.html)
+
+The CMake test property for serialising tests that share one global resource,
+such as the Vulkan device used by fireEngine's application scenarios.
+
 ### [GLFW documentation](https://www.glfw.org/docs/latest/)
 
 The official guide to GLFW's cross-platform window, input, event, and Vulkan
@@ -178,6 +188,11 @@ reuse.
 
 Worked Synchronization 2 examples for image layout transitions, transfer
 operations, and making uploaded data visible to later shader reads.
+
+### [Vulkan Validation Overview](https://docs.vulkan.org/guide/latest/validation_overview.html)
+
+The Khronos guide to Vulkan valid usage, VUIDs, undefined behaviour, and the
+development-time role of the validation layer.
 
 ### [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
 
