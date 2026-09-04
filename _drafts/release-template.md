@@ -1,48 +1,124 @@
 ---
-title: "<project> X.Y: Release title"
-date: 2026-07-27 00:00:00 +0100
-categories: [<project>, Releases]
-tags: [<project>, release]
-description: "A one-sentence summary of what this release adds."
+title: "<Verb> <what changed> in <project>"
+date: 2026-01-01 10:00:00 +0100
+categories: [<project>, Development]
+tags: [<project>, "X.Y", <topic>, <topic>, cpp]
+description: >-
+  One or two lines saying what this article establishes. Not a list of
+  contents.
 release_url: "https://github.com/nnewson/<repo>/releases/tag/X.Y"
+previous_release_url: "https://github.com/nnewson/<repo>/releases/tag/X.Y-1"
 ---
 
-## Release goal
+<!--
+This file is a checklist, not a skeleton. Copy the front matter, then delete
+everything below it and write the article the argument needs.
 
-What should readers be able to see, understand, or build by the end of this
-release?
+Deliberately there is no section list. A fixed set of headings produces
+articles that are complete and interchangeable; the sections get filled
+because they exist, not because the argument needs them. Sections are decided
+per article, from the questions below.
 
-> Source: [<project> X.Y]({{ page.release_url }})
-{: .prompt-info }
+Version tags MUST be quoted: `"0.9"`, not 0.9. Unquoted, YAML parses it as a
+float and the generated tag page is wrong.
+-->
 
-## What changed
+## Before writing
 
-Summarise the user-visible and architectural changes.
+**What is the claim?** One sentence, written down before the article. If it
+cannot be stated in one sentence, the article has more than one subject.
 
-## How it works
+**What would falsify it?** If nothing would, it is a description rather than a
+claim, and the piece is reference material — which is fine, but say so and
+stop applying the rest of this list.
 
-Explain the important design and implementation details. Prefer focused code
-snippets linked back to their complete source.
+**What does the reader believe at the end that they did not believe at the
+start?** That is the conclusion. It is not a summary of what was covered.
 
-```text
-A small, representative example, in the project's language.
-```
+## While writing
 
-## Problems and trade-offs
+**Every section needs a *because*.** For each one, ask what the argument loses
+if it is deleted. "A fact" is not an answer.
 
-Record the difficult bugs, rejected approaches, measurements, and compromises.
+**Can any two sections swap without damage?** If yes, they are topics, not
+moves in an argument. Either give the later one a dependency on the earlier, or
+collapse the set into a table and keep only the case that carries the weight.
 
-## Try this release
+**Nothing is claimed before it is earned.** If a section says a test found a
+defect, the mechanism that detects defects is already established. Walk the
+order once looking only for this.
 
-Add the commands required to check out, build, and run the tagged version.
+**Code excerpts argue or they go.** A before/after pair usually argues. A
+single excerpt has to justify itself. Link to the tag with a line range where
+the exact lines matter.
 
-```shell
-git clone https://github.com/nnewson/<repo>.git
-cd <repo>
-git checkout X.Y
-```
+**Cite where the evidence is, not everywhere.** Links belong inline at the
+point of the claim.
 
-## What comes next
+## Evidence
 
-Describe the capability this release unlocks and link to any relevant issue or
-milestone.
+**Measurements** state the hardware, driver, workload, run count, and spread.
+A number without them is an assertion with a decimal point. Say what the
+measurement does *not* cover — a result on one implementation limits the
+claim, it does not merely record where it came from.
+
+**Experiments** — a deliberate temporary change made to learn something —
+record all of:
+
+- that it was a temporary local mutation, since it is not in the tag;
+- the exact change, or a link to the affected lines;
+- the precise command and the named test registrations;
+- the device and driver environment;
+- what failed, what stayed green, and the message that identified it;
+- that the mutation was reverted afterwards.
+
+If any of those was not captured, say so in the article. An author-reported
+result with a stated gap is honest; one presented as recoverable from the tag
+is not.
+
+**Rejected approaches** need somewhere to point. A branch is not a permalink.
+Prefer a small recorded recipe — patch plus command plus result — over
+preserving dead code in the repository.
+
+## Include
+
+- **A way to run it.** Checkout, configure, build, and the specific command
+  that reproduces what the article discusses.
+
+  ```shell
+  git clone https://github.com/nnewson/<repo>.git
+  cd <repo>
+  git checkout X.Y
+  cmake --preset <preset> && cmake --build --preset <preset>
+  ctest --preset <preset> -R "^(<the tests this article is about>)$"
+  ```
+
+- **Recommended reading**, with every link also added to `_tabs/reading.md`.
+
+- **Cross-links** to the release's architecture page and to the posts this one
+  depends on, by descriptive name — "the descriptions post", not "the previous
+  article".
+
+## Do not include
+
+Retired with the tutorial format, because each assumes a reader reproducing a
+known outcome rather than following an argument:
+
+- a **Verify** section — verification is part of the argument, not an appendix;
+- a **Diagnose / troubleshooting** runbook;
+- a closing **delivery checklist** of what the release gives you;
+- per-section `See [file]` footers;
+- **ordinal or positional framing** — "the third post", "the next article" —
+  while the set is unfinished and its cuts may still move.
+
+## Before publishing
+
+- every linked source path resolves **at the tag**, not on a branch;
+- every quoted snippet matches the tag, including field order;
+- every count — tests, registrations, cases — checked against the tag;
+- every named test or CTest registration exists, and any `-R` regex selects
+  exactly the intended set;
+- link references balance: nothing undefined, nothing orphaned;
+- `python3 tools/check_diagrams.py` is clean;
+- `bundle exec jekyll build` is clean;
+- reading links are present in `_tabs/reading.md`.
