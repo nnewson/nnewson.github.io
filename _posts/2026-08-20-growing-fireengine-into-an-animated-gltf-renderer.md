@@ -329,6 +329,8 @@ the Vulkan lifetime protocol remains inside the renderer.
 
 ## Keep the facade public and its owners focused
 
+The completed work is covered in the [closing verification post][verification-post].
+
 Real content will grow the renderer implementation substantially. That is a
 reason to strengthen the facade, not to expose its Vulkan helpers again.
 
@@ -353,6 +355,8 @@ repeated preparation and exception safety reviewable, instead of resting on a
 fortunate sequence of assignments in one large `renderer.cpp`.
 
 ## Verify complete application scenarios
+
+The completed work is covered in the [closing verification post][verification-post].
 
 The device-free suite will continue to cover maths, loading, validation,
 animation, render planning, and Vulkan value-selection policy. The integration
@@ -452,4 +456,5 @@ content reaches the renderer.
 [visibility-post]: {% post_url 2026-08-29-adding-camera-depth-and-culling-to-fireengine %}
 [animation-post]: {% post_url 2026-08-30-animating-fireengines-transforms-without-rebuilding-resources %}
 [presentation-post]: {% post_url 2026-08-31-making-fireengines-presentation-state-replaceable %}
+[verification-post]: {% post_url 2026-09-02-closing-fireengine-08-with-focused-ownership-and-executable-scenarios %}
 [animated-cube]: <https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/AnimatedCube>

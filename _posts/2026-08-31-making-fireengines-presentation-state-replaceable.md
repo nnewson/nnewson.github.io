@@ -662,6 +662,10 @@ state with scene state. More frames in flight or more sophisticated deferred
 retirement can reduce the coarse waits later; the ownership boundary and the
 two completion domains remain the foundation those improvements need.
 
+The [closing verification post][verification-post] combines this recreation
+path with repeated preparation, fallback texturing, and the renderer's focused
+internal ownership boundary to complete the 0.8 walkthrough.
+
 ## Recommended reading
 
 - [Vulkan specification: Window System Integration][reading-wsi] — the
@@ -685,6 +689,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [planning-post]: {% post_url 2026-08-20-growing-fireengine-into-an-animated-gltf-renderer %}
 [camera-post]: {% post_url 2026-08-29-adding-camera-depth-and-culling-to-fireengine %}
 [frame-in-flight-post]: {% post_url 2026-08-04-preparing-fireengines-first-frame-in-flight %}
+[verification-post]: {% post_url 2026-09-02-closing-fireengine-08-with-focused-ownership-and-executable-scenarios %}
 [source-renderer-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/render/renderer.hpp>
 [source-renderer]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/render/renderer.cpp>
 [source-swapchain-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/render/detail/swapchain.hpp>
