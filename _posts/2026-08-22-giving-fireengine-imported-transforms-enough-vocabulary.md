@@ -419,13 +419,23 @@ return result;
 ```
 
 Right-handed view space looks along negative Z. After perspective division, the
-near plane maps to depth zero and the far plane to one. Negating the Y scale in
-the projection compensates for a positive-height Vulkan viewport, keeping
-positive view-space Y visually upward.
+near plane maps to depth zero and the far plane to one. With a positive-height
+Vulkan viewport, positive normalized-device Y maps towards increasing
+framebuffer Y, which is visually downward. Negating Y in the projection
+compensates for that mapping.
 
-These choices remain ordinary maths tests. The renderer decides when to build
-and upload the camera matrix, but it does not own the conventions encoded by
-the maths type.
+In release 0.8, device-free maths tests pin the camera contract: a right-handed
+view looking down negative Z, a zero-to-one depth range, and the then-chosen
+projection Y inversion. The renderer decides when to build and upload the
+resulting camera matrix.
+
+> **Editor's note — release 0.9:** I later moved this Y inversion out of
+> `Mat4::perspective()` and into Vulkan's viewport transform. The projection
+> still maps depth from zero to one—the clip-space convention used by Vulkan
+> and D3D, rather than OpenGL's conventional negative-one-to-one range. The
+> framebuffer Y inversion is a rasterisation-stage convention, however, so
+> release 0.9 expresses it with a negative-height viewport and leaves the
+> projection matrix Y-up.
 
 See the camera factories in [`mat4.hpp`][source-mat4].
 
@@ -508,9 +518,9 @@ void Scene::registerSubtree(SceneNode& node)
 }
 ```
 
-Calling the function again skips nodes that already have IDs, so repeated world
-updates do not renumber animation targets. Invalid-sentinel and out-of-range
-IDs return no node.
+Each world update repeats the registration walk. Nodes that already have IDs
+are skipped, while newly added children are appended to the lookup, so existing
+IDs remain unchanged. Invalid-sentinel and out-of-range IDs return no node.
 
 There is one deliberate looseness in release 0.8. A child added after its root
 has entered the scene does not receive an ID at mutation time. The next
@@ -534,8 +544,9 @@ stricter mutation-time registration invariant remains later work.
 
 `SceneNodeId` is also scene-local by contract rather than by encoded provenance.
 An in-range ID copied from another scene can name the same dense slot in this
-one. Callers must therefore retain the owning scene alongside the ID instead of
-treating it as a process-wide identity.
+one. A `SceneNodeId` only has meaning when passed back to the same `Scene` that
+assigned it. It must not be reused with another scene, and should be discarded
+when that scene is replaced.
 
 See the complete [`scene.cpp`][source-scene].
 
@@ -700,8 +711,8 @@ that path:
   conventions;
 - scene traversal resolves decomposed local values into cached world matrices;
 - right-handed look-at reports degenerate runtime bases explicitly;
-- perspective validates setup and fixes Vulkan's zero-to-one depth and Y
-  direction;
+- in release 0.8, perspective validates setup and encodes both zero-to-one
+  depth and the framebuffer Y compensation;
 - `SceneNodeId` gives callers a typed, stable, scene-local lookup key;
 - dense lookup returns optional mutable or const references without transferring
   ownership;
