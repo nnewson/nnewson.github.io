@@ -258,6 +258,9 @@ class rather than weakening the matrix layout.
 
 ## Allow transform-only nodes
 
+The optional render-object accessor comes from
+[`scene_node.hpp`][source-scene-node-header].
+
 Not every useful point in a hierarchy has geometry. A parent may group several
 objects, provide a shared transform, or reserve a named attachment point. The
 render-object reference is therefore optional:
@@ -279,6 +282,9 @@ the asset post and will be rejected when the scene and catalogue meet during
 render preparation.
 
 ## Resolve transforms from roots towards leaves
+
+The traversal entry point and recursive resolver come from
+[`scene.cpp`][source-scene] and [`scene_node.cpp`][source-scene-node].
 
 Changing a local transform does not immediately walk the hierarchy. The
 application first updates whichever nodes it needs, then asks the scene to
@@ -362,6 +368,9 @@ dependencies independently of their transforms. The scene still knows nothing
 about how a consumer will turn either value into GPU resources.
 
 ## Preserve stable depth-first traversal
+
+The node traversal and scene entry point come from
+[`scene_node.cpp`][source-scene-node] and [`scene.cpp`][source-scene].
 
 A node appends itself before visiting its children:
 

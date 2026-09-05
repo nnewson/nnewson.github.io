@@ -126,7 +126,7 @@ pushes platform policy towards the edge of the program.
 
 Catch2 joins the other reproducible dependencies in [`vcpkg.json`][source-vcpkg].
 The pinned vcpkg registry resolves the same package version locally and in CI,
-and CMake requests Catch2 version 3 explicitly:
+and [`CMakeLists.txt`][source-cmake] requests Catch2 version 3 explicitly:
 
 ```cmake
 find_package(Catch2 3 CONFIG REQUIRED)
@@ -183,6 +183,8 @@ when several invalid inputs share setup. CTest still reports the surrounding
 section separately.
 
 ## Keep tests under the same compiler policy
+
+The reusable warning function comes from [`CMakeLists.txt`][source-cmake].
 
 The original warning logic applied only to the application target. With three
 first-party targets, repeating that platform-specific block would make it easy
@@ -391,6 +393,8 @@ rendering policies are passed values instead of reaching into the environment
 themselves.
 
 ## Keep the rendered-frame smoke test
+
+The smoke-test registration comes from [`CMakeLists.txt`][source-cmake].
 
 The existing bounded application test is renamed from `fireEngineTutorial` to
 `fireEngineTutorialSmoke`, making its scope visible next to the new unit cases:

@@ -224,6 +224,9 @@ See the application loop in [`main.cpp`][source-main].
 
 ## Traverse every animator in hierarchy order
 
+The root traversal and recursion come from
+[`animation_playback.cpp`][source-playback-cpp].
+
 `advanceAnimations()` starts at each scene root and recursively visits the
 complete forest:
 
@@ -261,6 +264,9 @@ scene can therefore combine structural, animated, and renderable nodes without
 a parallel animation-only hierarchy.
 
 ## Advance every binding independently
+
+The animator update and playback-time calculation come from
+[`animation_playback.cpp`][source-playback-cpp].
 
 Once an `Animator` is found, playback copies its state, resolves its typed IDs,
 and selects the referenced channel:
@@ -317,6 +323,9 @@ absolute playback clock. Release 0.8 chooses the smaller state suitable for its
 single demonstration clip and names the limitation in the implementation.
 
 ## Find the surrounding keyframes
+
+The boundary checks and interval search come from
+[`animation_playback.cpp`][source-playback-cpp].
 
 Sampling first handles both ends of the channel:
 

@@ -267,6 +267,9 @@ See the presentation ownership in [`renderer.cpp`][source-renderer].
 
 ## Select a supported depth-only format
 
+The format-selection helper comes from
+[`depth_buffer.cpp`][source-depth-cpp].
+
 The renderer does not assume that its preferred depth format is available for
 optimal-tiled attachment use. `DepthBuffer` checks two depth-only candidates in
 order:
@@ -413,6 +416,9 @@ See `transitionDepthToAttachment()` in
 
 ## Clear far and keep nearer fragments
 
+The depth clear and rendering attachment come from
+[`renderer.cpp`][source-renderer].
+
 Dynamic rendering receives the depth view alongside the acquired colour view:
 
 ```cpp
@@ -500,6 +506,9 @@ See [`pipeline.hpp`][source-pipeline-header] and
 
 ## Cull back faces without guessing the winding
 
+The rasterization state comes from
+[`pipeline.cpp`][source-pipeline-cpp].
+
 Depth decides which frontmost surface wins. Back-face culling prevents the
 opposite side of an opaque closed surface from producing fragments in the
 first place:
@@ -547,6 +556,8 @@ nor disables culling for double-sided materials. AnimatedCube uses the
 positive-determinant, single-sided path this pipeline supports.
 
 ## Keep the frame order visible
+
+The command-recording sequence comes from [`renderer.cpp`][source-renderer].
 
 The command buffer now records colour and depth setup before it begins dynamic
 rendering:

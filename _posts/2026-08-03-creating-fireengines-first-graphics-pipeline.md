@@ -182,6 +182,8 @@ used by the rest of the build.
 
 ## Compile the shader as part of the build graph
 
+The shader-output setup comes from [`CMakeLists.txt`][source-cmake].
+
 The shader is a build input rather than a checked-in binary. CMake first names
 its source, output directory, and generated module:
 
@@ -200,6 +202,8 @@ The binary directory can be removed and regenerated without touching the Slang
 source, and different build trees can produce their own shader artefacts.
 
 ### Make `triangle.spv` a real generated output
+
+The custom command comes from [`CMakeLists.txt`][source-cmake].
 
 The custom command describes how that binary is produced:
 
@@ -253,6 +257,8 @@ stable if the file is later split, because `pipeline.cpp` always requests
 `vertexMain` and `fragmentMain`.
 
 ### Attach the output to targets
+
+The shader target and dependencies come from [`CMakeLists.txt`][source-cmake].
 
 A generated file does not build merely because a custom command knows how to
 create it. Release 0.4 connects the rule to the default build and then makes the
@@ -310,6 +316,9 @@ Release 0.4 needs only a compact part of the language. The complete shader is
 
 ### Describe the frame resource
 
+The frame-uniform declaration comes from
+[`triangle.slang`][source-shader].
+
 The shader begins with the uniform data used by the vertex stage:
 
 ```hlsl
@@ -338,6 +347,9 @@ command will push that descriptor update directly into its command buffer
 instead of allocating and updating a persistent descriptor set.
 
 ### Define the vertex-stage boundary
+
+The vertex input and output declarations come from
+[`triangle.slang`][source-shader].
 
 The two interface structures describe data entering the vertex shader and
 leaving it for rasterisation:
@@ -374,6 +386,8 @@ location makes the interface clear to both Slang and Vulkan.
 
 ### Transform each vertex
 
+The vertex entry point comes from [`triangle.slang`][source-shader].
+
 The attribute on `vertexMain` marks both an entry point and its pipeline stage:
 
 ```hlsl
@@ -401,6 +415,8 @@ pipeline creation can validate its SPIR-V while the next milestone gains an
 exact description of the resources it must allocate and bind.
 
 ### Return one opaque fragment colour
+
+The fragment entry point comes from [`triangle.slang`][source-shader].
 
 The fragment stage is smaller:
 
@@ -479,6 +495,8 @@ full pipeline implementation in [`pipeline.cpp`][source-pipeline].
 
 ## Require the Vulkan 1.4 pipeline features
 
+The feature query and enablement come from [`device.cpp`][source-device].
+
 Release 0.2 already queried Vulkan 1.3 dynamic-rendering and synchronization-2
 features. Device inspection now extends that query through the Vulkan 1.4
 feature structure:
@@ -544,6 +562,8 @@ problematic device-create structure. The complete changes are in
 
 ## Create a layout for the future frame descriptor
 
+The descriptor-layout excerpts come from [`pipeline.cpp`][source-pipeline].
+
 The shader reserves set zero, binding zero. C++ describes the matching binding
 as one uniform buffer visible to the vertex stage:
 
@@ -580,6 +600,9 @@ pipeline layout remains a `Pipeline` member because future push-descriptor
 commands must name it while recording frames.
 
 ## Load SPIR-V without creating shader modules
+
+The SPIR-V loading and stage setup come from
+[`pipeline.cpp`][source-pipeline].
 
 Pipeline creation reads the generated binary into 32-bit words. The loader
 rejects a missing or empty file, a byte count that is not divisible by four, and
@@ -711,10 +734,13 @@ stencil formats remain undefined, making a null depth/stencil state valid. A
 null pipeline-cache argument is also intentional: one pipeline compiled once at
 startup does not yet justify cache persistence or invalidation policy.
 
-The resulting RAII pipeline and its layout become the two members of
+The chain above is built in [`pipeline.cpp`][source-pipeline]; the resulting
+RAII pipeline and its layout become the two members of
 [`Pipeline`][source-pipeline-header].
 
 ## Give the pipeline one RAII owner
+
+The owner declaration comes from [`pipeline.hpp`][source-pipeline-header].
 
 As with the allocator and swapchain owners introduced in release 0.3, the
 public class makes ownership and permitted operations explicit:

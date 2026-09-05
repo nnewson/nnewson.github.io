@@ -313,20 +313,25 @@ def main() -> int:
     for path in files:
         for block in blocks(path):
             block_count += 1
+            silenced = 0
             for name in args.only:
                 hits = RULES[name](block)
                 if name in block.ignores:
                     suppressed += len(hits)
-                    if not hits:
-                        stale.append(f"{path}:{block.start}: {name}")
+                    silenced += len(hits)
                     continue
                 findings.extend(hits)
+            # A marker is stale only when it silenced nothing at all. Reporting
+            # per rule would flag every blanket ignore for the rules a block
+            # never trips.
+            if block.ignores and silenced == 0:
+                stale.append(f"{path}:{block.start}")
 
     for finding in sorted(findings, key=lambda f: (str(f.path), f.line)):
         print(finding)
 
     for entry in stale:
-        print(f"{entry} stale align marker: rule found nothing to silence")
+        print(f"{entry}: stale align marker, it silenced nothing")
 
     counts = {name: sum(1 for f in findings if f.rule == name) for name in sorted(RULES)}
     summary = "  ".join(f"{k}={v}" for k, v in counts.items() if k in args.only)

@@ -55,6 +55,13 @@ the exact lines matter.
 **Cite where the evidence is, not everywhere.** Links belong inline at the
 point of the claim.
 
+**Link the file the snippet came from, not the type the section is about.**
+Those diverge whenever a section discusses a class and quotes its
+implementation, which is often. A section about `Pipeline` that shows pipeline
+*creation* wants `pipeline.cpp`, not `pipeline.hpp`. Keep any other genuinely
+relevant link alongside it. A section that shows no source needs no link at
+all.
+
 ## Evidence
 
 **Measurements** state the hardware, driver, workload, run count, and spread.
@@ -118,7 +125,12 @@ known outcome rather than following an argument:
 - every count — tests, registrations, cases — checked against the tag;
 - every named test or CTest registration exists, and any `-R` regex selects
   exactly the intended set;
+- every section quoting source links to the file that source lives in;
 - link references balance: nothing undefined, nothing orphaned;
 - `python3 tools/check_diagrams.py` is clean;
+- `python3 tools/check_source_links.py` is clean;
 - `bundle exec jekyll build` is clean;
 - reading links are present in `_tabs/reading.md`.
+
+The two script checks run automatically in `.githooks/pre-commit`. The build
+and everything above them are judgement or manual steps no tool makes for you.

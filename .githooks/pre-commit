@@ -22,3 +22,15 @@ python3 tools/check_diagrams.py || {
     echo "  <!-- align: ignore --> on the line above its \`\`\`text fence." >&2
     exit 1
 }
+
+python3 tools/check_source_links.py || {
+    echo >&2
+    echo "pre-commit: source-link check failed (see above)." >&2
+    echo "  S1: the section quotes source but links to no file." >&2
+    echo "  S2: it links to a file that does not contain the code shown," >&2
+    echo "      usually because the link names the type rather than the" >&2
+    echo "      file the snippet came from." >&2
+    echo "  Mark a deliberately illustrative snippet with" >&2
+    echo "  <!-- source-link: ignore --> above its section heading." >&2
+    exit 1
+}

@@ -244,6 +244,8 @@ See the complete [`buffer.hpp`][source-buffer-header] and
 
 ## Make uploads bounded and coherent
 
+The bounded write operation comes from [`buffer.cpp`][source-buffer].
+
 `write()` accepts bytes so the same buffer owner can upload any trivially
 represented resource:
 
@@ -286,6 +288,9 @@ submission can read the buffers. Future per-frame animation can reuse the same
 method after waiting for that frame slot's fence.
 
 ## Upload three vertices once
+
+The triangle data and upload path come from
+[`renderer.cpp`][source-renderer].
 
 The renderer defines a triangle directly in normalized device coordinates:
 
@@ -435,6 +440,8 @@ See the complete [`renderer.hpp`][source-renderer-header].
 
 ## Wait before reusing the frame slot
 
+The frame-fence wait comes from [`renderer.cpp`][source-renderer].
+
 `renderFrame()` starts on the host by waiting indefinitely for the previous
 submission associated with this frame:
 
@@ -527,11 +534,14 @@ the fence and commit to submission.
 `Swapchain` adds singular `image()`, `imageView()`, and `renderFinished()`
 accessors for this path. Each uses the same acquired index and bounds-checks its
 vector access, keeping the presentable image, attachment view, and semaphore
-paired without exposing indexing policy throughout the renderer. See the
-updated [`swapchain.hpp`][source-swapchain-header] and
+paired without exposing indexing policy throughout the renderer. The acquire
+and reset sequence above lives in [`renderer.cpp`][source-renderer], which
+uses the accessors added to [`swapchain.hpp`][source-swapchain-header] and
 [`swapchain.cpp`][source-swapchain].
 
 ## Begin a one-use command recording
+
+The recording setup comes from [`renderer.cpp`][source-renderer].
 
 `recordCommands()` retrieves the primary buffer returned to its initial state
 by the pool reset:
@@ -554,6 +564,9 @@ Resetting the pool first remains essential. The pool does not have
 buffer from the previous frame.
 
 ## Transition the image into attachment layout
+
+The barrier and dependency excerpts come from
+[`renderer.cpp`][source-renderer].
 
 Acquiring an image identifies which swapchain image this frame may use, but it
 does not put that image into the layout required for rendering. Vulkan images
@@ -625,6 +638,9 @@ transition.
 
 ## Describe one dynamic-rendering colour attachment
 
+The attachment and rendering declarations come from
+[`renderer.cpp`][source-renderer].
+
 An attachment is the image view that a rendering operation reads, writes,
 resolves, clears, or preserves. Release 0.6 uses the view associated with the
 acquired swapchain image.
@@ -673,6 +689,8 @@ The render area covers the full swapchain image and only one array layer. There
 is no depth, stencil, resolve, or multisampled attachment in this first path.
 
 ## Set the viewport and scissor dynamically
+
+The dynamic viewport and scissor come from [`renderer.cpp`][source-renderer].
 
 The graphics pipeline declared viewport and scissor as dynamic state, so the
 command buffer must provide both before drawing:
@@ -826,6 +844,8 @@ See the complete [`renderer.cpp`][source-renderer].
 
 ## Submit with Synchronization 2
 
+The submission sequence comes from [`renderer.cpp`][source-renderer].
+
 Once recording has succeeded, the renderer resets the signaled frame fence:
 
 ```cpp
@@ -921,6 +941,10 @@ would not prove that graphics finished before presentation begins.
 
 ## Present the acquired image and preserve its outcome
 
+The presentation path and result type come from
+[`renderer.cpp`][source-renderer] and
+[`renderer.hpp`][source-renderer-header].
+
 The presentation request selects the semaphore paired with the acquired image,
 not the current frame slot:
 
@@ -994,6 +1018,10 @@ the old swapchain, per-image semaphores, and format-dependent pipeline without
 obscuring the first complete render loop.
 
 ## Keep the renderer exception-safe after submission
+
+The pending-work protocol and destructor come from
+[`renderer.cpp`][source-renderer] and
+[`renderer.hpp`][source-renderer-header].
 
 Once `submit2()` succeeds, GPU work may outlive the C++ stack frame. The
 renderer records that fact:
