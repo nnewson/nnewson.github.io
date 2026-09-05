@@ -117,6 +117,8 @@ See [`vec2.hpp`][source-vec2].
 
 ## Give three-component vectors geometric operations
 
+The vector operations come from [`vec3.hpp`][source-vec3].
+
 The original `Vec3` only stored components. Building a camera basis requires
 subtraction, dot and cross products, a squared length, and normalisation, so the
 type gains that focused set rather than becoming a general vector library.
@@ -198,6 +200,9 @@ See [`normalize_error.hpp`][source-normalize-error] and
 [`vec3.hpp`][source-vec3].
 
 ## Store rotations in glTF component order
+
+The quaternion layout and robust normalization come from
+[`quaternion.hpp`][source-quaternion].
 
 glTF stores quaternion rotations as `(x, y, z, w)`: three imaginary components
 followed by the real component. fireEngine adopts the same public order so a

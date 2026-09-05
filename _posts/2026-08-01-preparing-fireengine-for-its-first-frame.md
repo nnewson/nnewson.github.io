@@ -222,6 +222,9 @@ unambiguous. The public declaration is in
 
 ### Connect VMA to the linked Vulkan loader
 
+The VMA implementation configuration comes from
+[`allocator.cpp`][source-allocator].
+
 VMA's implementation lives in exactly one translation unit:
 
 ```cpp
@@ -278,6 +281,9 @@ and command-recording concerns.
 
 ## Query the surface again at swapchain creation
 
+The surface-support structure and query come from
+[`swapchain.cpp`][source-swapchain].
+
 Device selection in 0.2 rejected devices without surface formats or
 presentation modes. Swapchain creation still queries the surface again because
 these capabilities belong to the current device-and-surface pair and provide
@@ -324,6 +330,8 @@ turns those possibilities into a small, deterministic policy.
 
 ### Prefer an sRGB surface format
 
+The preferred-format selection comes from [`swapchain.cpp`][source-swapchain].
+
 Each surface format combines a channel layout with a colour space. fireEngine
 prefers BGRA with an sRGB transfer function and an sRGB nonlinear colour space:
 
@@ -348,6 +356,8 @@ Device selection already guarantees that `formats` is non-empty, and the
 helper documents that precondition next to the `front()` call.
 
 ### Prefer mailbox, fall back to FIFO
+
+The present-mode selection comes from [`swapchain.cpp`][source-swapchain].
 
 The presentation mode determines how completed images enter the display's
 presentation queue. Release 0.3 chooses mailbox when the surface exposes it:
@@ -416,6 +426,8 @@ See [`window.hpp`][source-window-header] and
 
 ### Request one image beyond the minimum
 
+The image-count calculation comes from [`swapchain.cpp`][source-swapchain].
+
 The surface advertises a minimum and possibly a maximum swapchain image count.
 fireEngine asks for one more than the minimum to leave room for presentation
 while rendering progresses:
@@ -475,6 +487,8 @@ All of these helpers and their documented assumptions live in
 
 ## Account for graphics and presentation queue families
 
+The sharing-mode setup comes from [`swapchain.cpp`][source-swapchain].
+
 Release 0.2 deliberately supported both a single queue family that handles
 graphics and presentation and two separate families. Swapchain creation now
 turns that distinction into an image-sharing choice. It begins with the
@@ -501,6 +515,9 @@ irrelevant family list attached, so the structure states exactly which fields
 Vulkan will read in either mode.
 
 ## Create the swapchain and retrieve its images
+
+The creation and image-retrieval excerpts come from
+[`swapchain.cpp`][source-swapchain].
 
 With every choice made, the create info brings the policy together:
 
@@ -552,6 +569,8 @@ pass the old handle and carefully replace the resources that depend on its
 images.
 
 ## Give every image a two-dimensional colour view
+
+The image-view loop comes from [`swapchain.cpp`][source-swapchain].
 
 The eventual colour-attachment commands need views, so release 0.3 creates one
 for every image in swapchain order:

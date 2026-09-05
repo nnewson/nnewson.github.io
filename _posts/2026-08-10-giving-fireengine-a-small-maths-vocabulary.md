@@ -194,6 +194,8 @@ operations allocates memory or has an exceptional failure mode.
 
 ## Separate logical indexing from physical storage
 
+The indexing operators come from [`mat4.hpp`][source-mat4].
+
 Matrix notation normally names an element by row and then column. The storage
 layout answers a different question: which element appears next in memory?
 
@@ -264,6 +266,8 @@ looks like earlier C++.
 
 ## Name rows and columns for multiplication
 
+The row and column helpers come from [`mat4.hpp`][source-mat4].
+
 `Mat4` can also return one logical row or column as a `Vec4`:
 
 ```cpp
@@ -295,6 +299,8 @@ result. Optimisation can wait until measurement shows that this small scene
 maths layer needs it.
 
 ## Build translation and scale explicitly
+
+The factory declarations come from [`mat4.hpp`][source-mat4].
 
 The first scene only needs two transform factories. Translation starts from
 identity and places its three values in the final column:
@@ -331,6 +337,9 @@ These factories also make the role of a `Vec3` explicit. The same storage shape
 becomes a translation or scale only when passed to the corresponding function.
 
 ## Compose transforms in the order they apply
+
+The operators and composition test come from [`mat4.hpp`][source-mat4] and
+[`test_mat4.cpp`][source-test-mat4].
 
 Matrix multiplication fills each result element with a left-row/right-column
 dot product:
@@ -394,6 +403,9 @@ The input position first becomes `(2, 3, 4)`, then the translation adds another
 check: it fixes the convention that scene traversal uses.
 
 ## Resolve parent and local transforms consistently
+
+The scene-node resolution excerpt comes from
+[`scene_node.cpp`][source-scene-node].
 
 The [first scene graph][scene-post] stores an identity local transform and an
 identity world transform on every new node. Resolving a node composes them in
@@ -693,6 +705,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [source-draw-constants]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/render/draw_constants.hpp>
 [source-shader]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/shaders/triangle.slang>
 [source-main]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/src/main.cpp>
+[source-scene-node]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/src/scene/scene_node.cpp>
 [reading-foundations]: <https://foundationsofgameenginedev.com/#fged1>
 [reading-real-time-rendering]: <https://www.realtimerendering.com/>
 [reading-cpp-subscript]: <https://en.cppreference.com/w/cpp/language/operators.html#Array_subscript_operator>

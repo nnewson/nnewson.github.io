@@ -205,6 +205,8 @@ See the complete [`gltf_loader.cpp`][source-gltf-loader-cpp].
 
 ## Parse a deliberately constrained document
 
+The parser options come from [`gltf_loader.cpp`][source-gltf-loader-cpp].
+
 Parsing starts from a JSON `.gltf` path. `fastgltf::GltfDataBuffer::FromPath()`
 owns the initial file read, then the parser loads external buffers and asks
 fastgltf to decompose node matrices into translation, rotation, and scale:
@@ -315,6 +317,8 @@ by every such primitive in the document. That keeps the engine asset graph
 complete without inventing a source-format dependency in the renderer.
 
 ## Extract geometry through accessors, not byte assumptions
+
+The accessor iteration comes from [`gltf_loader.cpp`][source-gltf-loader-cpp].
 
 The supported primitive shape is intentionally exact:
 

@@ -257,6 +257,8 @@ See [`window.hpp`][source-window-header] and
 
 ## Wait for a minimised window without spinning
 
+The event-waiting loop comes from [`main.cpp`][source-main].
+
 A minimised window can report a framebuffer with zero width or height. Vulkan
 cannot create a useful swapchain or projection for that extent, and repeatedly
 polling it would consume CPU while no drawable image exists.
@@ -287,6 +289,8 @@ the wait, makes `shouldClose()` true, and exits without requiring a drawable
 framebuffer first.
 
 ## Retire old work before replacing its state
+
+The replacement sequence comes from [`renderer.cpp`][source-renderer].
 
 The renderer's replacement protocol is short enough to read as one sequence:
 
@@ -380,6 +384,8 @@ The [camera post][camera-post] covers the extent, depth, pipeline, and uniform
 relationships in detail.
 
 ## Distinguish graphics completion from presentation retirement
+
+The two waits come from [`renderer.cpp`][source-renderer].
 
 One frame crosses two completion domains:
 

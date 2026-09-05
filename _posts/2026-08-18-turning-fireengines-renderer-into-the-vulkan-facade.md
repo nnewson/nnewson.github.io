@@ -213,6 +213,9 @@ See the complete [`renderer.hpp`][source-renderer-header].
 
 ## Hide the implementation with a pimpl
 
+The internal ownership layout comes from
+[`renderer.cpp`][source-renderer-cpp].
+
 Forward declarations alone cannot hide Vulkan if `Renderer` stores its owners
 directly: the compiler needs their complete types to lay out and destroy the
 class. Release 0.7 instead gives the public object one
@@ -258,6 +261,9 @@ release 0.7 does not need transfer semantics for an initialised device,
 surface, presentation path, frame slot, or compiled-resource lookup.
 
 ## Construct the internal tree in dependency order
+
+The implementation and facade constructors come from
+[`renderer.cpp`][source-renderer-cpp].
 
 The pimpl constructor rebuilds the ownership chain removed from `main()`:
 
@@ -368,6 +374,9 @@ See [`renderer.cpp`][source-renderer-cpp] and the earlier
 
 ## Turn a plan into stable ID lookups
 
+The compilation transaction comes from
+[`renderer.cpp`][source-renderer-cpp].
+
 `Renderer::Impl::prepare()` obtains the plan covered by the previous post and
 returns immediately if the renderer has already compiled its generation:
 
@@ -437,6 +446,8 @@ instead of falsely accepting an incomplete result.
 
 ## Require successful preparation before drawing
 
+The preparation guards come from [`renderer.cpp`][source-renderer-cpp].
+
 The old `renderFrame()` could assume its constructor had uploaded the one
 triangle. The new `drawFrame()` accepts a scene, so it first enforces the
 explicit phase contract:
@@ -479,6 +490,9 @@ Vulkan synchronization and presentation steps; the new contract is the scene
 validation that precedes them.
 
 ## Record current commands instead of durable commands
+
+The recording entry point comes from
+[`renderer.cpp`][source-renderer-cpp].
 
 Preparation creates durable buffers, not a permanently recorded command
 buffer. `drawFrame()` passes the latest flattened scene to command recording on
@@ -575,6 +589,8 @@ See [`frame_in_flight.hpp`][source-frame-header],
 
 ## Bind and draw each prepared object
 
+The draw loop comes from [`renderer.cpp`][source-renderer-cpp].
+
 `beginColorPass()` binds the graphics pipeline and frame uniform once. The draw
 loop then resolves each `RenderObjectId` directly through the prepared lookup:
 
@@ -669,6 +685,8 @@ See the complete [`triangle.slang`][source-shader].
 
 ## Keep the application loop at its own level
 
+The application-loop excerpts come from [`main.cpp`][source-main].
+
 Once content is prepared, each event-loop iteration performs application and
 facade operations rather than Vulkan orchestration:
 
@@ -697,6 +715,8 @@ The renderer hides mechanism without hiding outcomes the application needs to
 report or act upon.
 
 ## Run the rendered-frame test
+
+The CTest registration comes from [`CMakeLists.txt`][source-cmake].
 
 Most release 0.7 rules are device-free, but pimpl ownership, buffer upload,
 command recording, submission, and presentation only become a working whole
@@ -872,6 +892,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [source-draw-constants]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/include/fire_engine/render/draw_constants.hpp>
 [source-pipeline]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/src/render/pipeline.cpp>
 [source-shader]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/shaders/triangle.slang>
+[source-cmake]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.7/CMakeLists.txt>
 [reading-cpp-software-design]: <https://www.oreilly.com/library/view/c-software-design/9781098113155/>
 [reading-game-engine-architecture]: <https://www.gameenginebook.com/>
 [reading-real-time-rendering]: <https://www.realtimerendering.com/>

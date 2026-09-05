@@ -171,6 +171,9 @@ hierarchy while supporting several primitives from one source mesh.
 
 ## Introduce format-neutral scene content
 
+The planned aggregate is present in the released
+[`scene_content.hpp`][source-scene-content].
+
 The completed work is covered in the [scene-content post][scene-content-post].
 
 The loader needs one result that is useful beyond glTF. `SceneContent` will
@@ -458,3 +461,4 @@ content reaches the renderer.
 [presentation-post]: {% post_url 2026-08-31-making-fireengines-presentation-state-replaceable %}
 [verification-post]: {% post_url 2026-09-02-closing-fireengine-08-with-focused-ownership-and-executable-scenarios %}
 [animated-cube]: <https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/AnimatedCube>
+[source-scene-content]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/content/scene_content.hpp>

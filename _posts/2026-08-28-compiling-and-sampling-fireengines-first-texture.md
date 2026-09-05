@@ -187,6 +187,9 @@ See [`image.hpp`][source-image-header] and
 
 ## Pair the image with its shader-visible view
 
+The `CompiledImage` owner comes from
+[`compiled_resources.cpp`][source-compiled-resources].
+
 Vulkan descriptors do not bind a raw image allocation. They bind an image view
 that selects the format and subresources through which the image will be used.
 `CompiledImage` owns both layers:
@@ -406,6 +409,9 @@ fences may be reused, but never while earlier work still owns their state.
 
 ## Compile filter and wrap meaning into one sampler
 
+The `CompiledTexture` constructor comes from
+[`compiled_resources.cpp`][source-compiled-resources].
+
 The CPU `Texture` describes nearest or linear filtering and one of three wrap
 modes without naming Vulkan. `CompiledTexture` converts those choices while
 borrowing the already compiled image:
@@ -451,6 +457,9 @@ them. That relationship survives the Vulkan boundary instead of being flattened
 into duplicate images.
 
 ## Keep untextured materials on the sampled path
+
+The fallback construction and render-object lookup come from
+[`compiled_resources.cpp`][source-compiled-resources].
 
 An optional base-colour texture is useful CPU vocabulary, but making it a
 shader branch would split the draw contract:

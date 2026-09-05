@@ -211,6 +211,8 @@ See the complete [`frame_in_flight.hpp`][source-frame-header].
 
 ## Create a pool for graphics commands
 
+The pool construction comes from [`frame_in_flight.cpp`][source-frame].
+
 Command buffers are allocated from a command pool associated with a queue
 family. The frame uses the family already selected for graphics work:
 
@@ -240,6 +242,9 @@ buffers from the same pool. A future multi-threaded renderer must ensure that
 only one host thread uses a frame's pool at a time.
 
 ## Allocate one primary command buffer
+
+The allocation and accessor excerpts come from
+[`frame_in_flight.cpp`][source-frame].
 
 Once the pool exists, the constructor allocates exactly one command buffer:
 
@@ -328,6 +333,8 @@ See the complete [`frame_in_flight.cpp`][source-frame].
 
 ## Create the frame's acquisition semaphore
 
+The semaphore construction comes from [`frame_in_flight.cpp`][source-frame].
+
 The frame owns the semaphore that will announce that a swapchain image is
 available:
 
@@ -354,6 +361,8 @@ waited for the fence, both the command buffer and acquisition semaphore are
 ready to be used by that slot again.
 
 ## Start the completion fence in the signaled state
+
+The fence construction comes from [`frame_in_flight.cpp`][source-frame].
 
 The other synchronization object owned by the frame connects GPU completion
 back to the CPU:
@@ -474,6 +483,10 @@ See the complete [`swapchain.hpp`][source-swapchain-header] and
 [`swapchain.cpp`][source-swapchain].
 
 ## Encode destruction order in the owners
+
+The member-order excerpts come from
+[`frame_in_flight.hpp`][source-frame-header],
+[`swapchain.hpp`][source-swapchain-header], and [`main.cpp`][source-main].
 
 Vulkan-Hpp releases RAII members automatically, but C++ still destroys class
 members in reverse declaration order. `FrameInFlight` uses that rule to encode

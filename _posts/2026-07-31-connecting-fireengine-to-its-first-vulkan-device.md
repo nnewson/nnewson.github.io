@@ -240,6 +240,8 @@ with `project(VERSION 0.2.0)` in [`CMakeLists.txt`][source-cmake].
 
 ## Add an error path that is safe during failure
 
+The logging helper shown here comes from [`log.hpp`][source-log].
+
 GLFW and Vulkan both report errors through C callbacks. Exceptions must not
 escape through those C boundaries, and a formatter failure should not hide the
 startup error that the logger was trying to explain. Release 0.2 introduces a
@@ -529,6 +531,9 @@ support code is in [`debug.cpp`][source-debug].
 
 ## Create the instance around a real loader and window
 
+The instance-construction excerpts come from
+[`device.hpp`][source-device-header] and [`device.cpp`][source-device].
+
 In 0.1, the default `vk::raii::Context` discovered a loader and the instance
 requested no extensions. The new `Device` connects its context to the loader
 linked by CMake:
@@ -601,6 +606,8 @@ the same ground with a smaller set of requirements.
 
 ### Require Vulkan 1.4 on the device
 
+The version check comes from [`device.cpp`][source-device].
+
 ```cpp
 if (properties.apiVersion < vk::ApiVersion14)
 {
@@ -619,6 +626,8 @@ diagnostic: an old loader fails before instance creation, while an old device
 is rejected by name during selection.
 
 ### Check the rendering features before enabling them
+
+The feature query and enablement come from [`device.cpp`][source-device].
 
 ```cpp
 const auto features = physicalDevice.getFeatures2<
@@ -652,6 +661,8 @@ drivers and demonstrates that supported features must be queried before they
 are enabled.
 
 ### Find graphics and presentation queues
+
+The queue-family selection comes from [`device.cpp`][source-device].
 
 Queue families advertise different work. The selector prefers one family that
 can do both graphics and presentation:
@@ -700,6 +711,8 @@ not the device alone, is the unit of support.
 
 ### Validate the future swapchain path
 
+The swapchain-support check comes from [`device.cpp`][source-device].
+
 The release does not create a swapchain yet, but it refuses to select a device
 that cannot support the next step:
 
@@ -737,6 +750,8 @@ These checks prevent release 0.2 from declaring success with a device that the
 next release would immediately have to reject.
 
 ### Keep every rejection reason
+
+The candidate-selection excerpt comes from [`device.cpp`][source-device].
 
 `inspectDevice()` returns
 [`std::expected<DeviceSelection, std::string>`][std-expected]. Success carries
@@ -934,6 +949,9 @@ now through the shared failure-safe logger.
 See the complete [`main.cpp`][source-main].
 
 ## Configure, build, and run release 0.2
+
+The CTest registration shown here comes from
+[`CMakeLists.txt`][source-cmake].
 
 The prerequisite toolchain and `VCPKG_ROOT` setup remain the same as in the
 [0.1 post][foundation-post]. Clone the new checkpoint directly with:

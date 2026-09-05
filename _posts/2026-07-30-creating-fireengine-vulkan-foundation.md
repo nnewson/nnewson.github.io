@@ -341,6 +341,8 @@ it.
 
 ### Establish the project and language baseline
 
+The build excerpt comes from [`CMakeLists.txt`][source-cmake].
+
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 
@@ -363,6 +365,9 @@ The next three lines request C++23, prohibit a silent fallback to an older
 standard, and turn off compiler-specific dialects such as `gnu++23`.
 
 ### Find Vulkan and expose one policy switch
+
+The package and compile-definition excerpt comes from
+[`CMakeLists.txt`][source-cmake].
 
 ```cmake
 find_package(VulkanHeaders 1.4 CONFIG REQUIRED)
@@ -389,6 +394,9 @@ cmake --preset vcpkg \
 That changes only the warning policy; the normal warning level remains active.
 
 ### Create the executable
+
+The target definition and application-info excerpts come from
+[`CMakeLists.txt`][source-cmake] and [`main.cpp`][source-main].
 
 ```cmake
 add_executable(fireEngineTutorial
@@ -429,6 +437,8 @@ member declaration order.
 
 ### Attach the Vulkan headers
 
+The link declaration comes from [`CMakeLists.txt`][source-cmake].
+
 ```cmake
 target_link_libraries(fireEngineTutorial PRIVATE
     Vulkan::Headers
@@ -445,6 +455,8 @@ headers to compile, but it does not publish them as an interface for another
 target to consume.
 
 ### Apply strict warnings on each compiler family
+
+The warning policy comes from [`CMakeLists.txt`][source-cmake].
 
 ```cmake
 if(MSVC)
@@ -492,6 +504,8 @@ so C++ object scope controls Vulkan object lifetime.
 
 ### Include the RAII API
 
+The translation-unit excerpt comes from [`main.cpp`][source-main].
+
 ```cpp
 #include <exception>
 #include <iostream>
@@ -503,6 +517,8 @@ The standard headers provide exception handling and console output.
 `vulkan_raii.hpp` provides the Vulkan-Hpp types under `vk::raii`.
 
 ### Catch startup failures at the edge
+
+The entry-point excerpt comes from [`main.cpp`][source-main].
 
 ```cpp
 int main()
@@ -523,6 +539,8 @@ becomes a readable diagnostic and a non-zero result for the shell and CTest.
 
 ### Load Vulkan entry points
 
+The context construction comes from [`main.cpp`][source-main].
+
 ```cpp
 vk::raii::Context context;
 ```
@@ -533,6 +551,8 @@ must outlive every RAII object created from it. That dependency is made obvious
 here because `context` is declared before the instance.
 
 ### Describe the application
+
+The application metadata comes from [`main.cpp`][source-main].
 
 ```cpp
 constexpr vk::ApplicationInfo applicationInfo{
@@ -553,6 +573,8 @@ The engine is deliberately named `"No Engine"` at this point. We have a
 Vulkan bootstrap program, not an engine abstraction.
 
 ### Describe the instance
+
+The instance declaration comes from [`main.cpp`][source-main].
 
 ```cpp
 const vk::InstanceCreateInfo instanceCreateInfo{

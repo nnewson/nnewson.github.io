@@ -172,6 +172,9 @@ See the complete
 
 ## Validate the catalogue before selecting from it
 
+The cache-input check comes from
+[`render_preparation.cpp`][source-render-preparation-cpp].
+
 Preparation first decides whether it has already validated this exact
 catalogue version:
 
@@ -210,6 +213,9 @@ lookup or GPU allocation, and only a new catalogue identity or revision causes
 them to run again.
 
 ## Keep the exact dependency sequence beside its hash
+
+The dependency extraction and comparison come from
+[`render_preparation.cpp`][source-render-preparation-cpp].
 
 The draw-list hash provides a quick transform-independent summary, but hashes
 can collide. Preparation therefore extracts the exact ordered render-object
@@ -264,6 +270,9 @@ in `[object 2, object 2]` leaves both the hash and exact key unchanged, so the
 same plan remains valid.
 
 ## Reject scene references before indexing the catalogue
+
+The checked-selection excerpt comes from
+[`render_preparation.cpp`][source-render-preparation-cpp].
 
 Asset validation proves that each `RenderObject` refers to an existing mesh
 and material. It cannot prove that a scene's `RenderObjectId` belongs to this
@@ -361,6 +370,9 @@ See the complete
 [`render_preparation.cpp`][source-render-preparation-cpp].
 
 ## Cache one current plan
+
+The cache commit comes from
+[`render_preparation.cpp`][source-render-preparation-cpp].
 
 After successful compilation, `RenderPreparation` replaces its cached input
 and output and increments a generation counter:
