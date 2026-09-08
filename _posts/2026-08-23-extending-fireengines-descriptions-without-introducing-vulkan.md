@@ -22,9 +22,10 @@ not a descriptor set. An animation curve is neither a scene node nor a
 per-frame command.
 
 This article examines the CPU-owned side of that architecture. `RenderAssets`
-owns images and textures, preparation follows their transitive relationships,
-reusable animation channels remain separate from node-local playback state,
-and each scene node receives one explicit component role.
+owns images and textures, preparation includes every asset referenced by the
+selected render objects, reusable animation channels remain separate from
+node-local playback state, and each scene node receives one explicit component
+role.
 
 The completed release loads, animates, textures, and renders AnimatedCube. This
 post deliberately stops at the description boundary: the loader, playback
@@ -341,9 +342,9 @@ The validator then checks each relationship in owning-container order:
 - every render object refers to an existing mesh and material.
 
 Colour components are required to be finite, but they are not clamped to the
-zero-to-one interval here. The engine-level description preserves the supplied
-factor; format-specific rules can be applied at the loader boundary when that
-boundary exists.
+zero-to-one interval here. Engine validation checks only that the supplied
+factor is finite; it neither clamps the value nor assumes glTF's zero-to-one
+range. Any range required by a source format is the importer's responsibility.
 
 Validation still covers the complete catalogue before preparation selects a
 visible subset. An unused malformed image is not allowed to remain dormant
@@ -352,7 +353,7 @@ valid graph, not a bag whose invalid regions become acceptable when unseen.
 
 See [`asset_validation.cpp`][source-asset-validation].
 
-## Follow transitive dependencies during preparation
+## Follow asset references during preparation
 
 Release 0.7 preparation selected the distinct meshes and materials reachable
 from the scene's ordered render-object dependencies. Textures add two more
@@ -408,8 +409,8 @@ See [`render_preparation.hpp`][source-render-preparation] and
 
 ## Preserve the transform-independent cache key
 
-Adding transitive resources does not change what makes a preparation plan
-stable. Its cache key remains:
+Adding image and texture references does not change what makes a preparation
+plan stable. Its cache key remains:
 
 ```text
 RenderAssets identity
@@ -421,18 +422,20 @@ ordered RenderObjectId dependencies
 
 The draw-list dependency hash remains a fast summary rather than the sole
 authority; the exact ordered render-object sequence still protects against a
-hash collision. Texture and image IDs do not need to be repeated in the cache
-key because they are reached through the validated asset graph represented by
-the collection identity and revision.
+hash collision. The texture and image IDs stored in the preparation plan do not
+need to appear separately in the cache key. With the `RenderAssets` instance
+and revision fixed, the ordered render-object IDs determine which materials,
+textures, and images the plan contains.
 
 A transform-only change leaves every part of this key unchanged. Later
 animation playback can replace a node's local rotation, resolve new world
 matrices, and submit different per-draw transforms while reusing the same
 prepared image, texture, mesh, material, and render-object resources.
 
-Adding even an unused image or texture does advance the asset revision and
-causes a rebuild. That is consistent with complete-catalogue validation: the
-input version has changed and must become the new validated version before its
+Adding an unused image or texture still advances the asset revision, so
+preparation rebuilds the plan even when its selected resources remain
+unchanged. That is consistent with complete-catalogue validation: the input
+version has changed and must become the new validated version before its
 selected subset can be trusted.
 
 ## Describe reusable animation channels without scene targets
@@ -581,7 +584,8 @@ creates exactly this structure when it imports a mesh-bearing animated node.
 The trade-off is intentionally narrow. A node cannot directly hold several
 behaviours or several animation channels. The selected AnimatedCube path needs
 one rotation animator and renderable children, so a general component container
-would add policy before a concrete use case requires it.
+would force the engine to decide how several components are stored, retrieved,
+and combined before the release needs that flexibility.
 
 ## Validate curves separately from bindings
 
@@ -809,7 +813,8 @@ its Vulkan boundary:
 - all asset insertions participate in the existing revision contract;
 - validation rejects malformed images and dangling texture relationships before
   GPU work;
-- preparation computes the transitive render-object-to-image dependency closure;
+- preparation follows selected render objects through their materials and
+  textures to the required images;
 - shared images are selected once even when several textures use them;
 - unused images and textures remain outside the preparation plan;
 - transform-only changes continue to reuse stable prepared resources;
