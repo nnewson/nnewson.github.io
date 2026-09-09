@@ -178,16 +178,18 @@ glTF document
     SceneContent
 ```
 
-Two details are worth reading off that shape. The animation stage has a single
-source and two products: sampler data becomes reusable `AnimationChannel`
-values, while the source channels also yield the per-node bindings. And `Scene`
-is not produced by nodes alone — it is built from the selected hierarchy and
-those bindings together.
+The diagram highlights two details. The animation stage has a single source and
+two products: sampler data becomes reusable `AnimationChannel` values, while
+the source channels also yield the per-node bindings. And `Scene` is not
+produced by nodes alone — it is built from the selected hierarchy and those
+bindings together.
 
-One edge is left off to keep the picture legible. Node construction also
-consumes the mesh translation table, because a node carrying a source mesh
-gains one renderable child per primitive. That relationship has its own diagram
-in the hierarchy section below.
+One edge is left off to keep the picture legible. Mesh import first builds a
+mesh translation table: a mapping from each glTF mesh index to the engine
+`RenderObjectId` values created for its primitives. Node construction also
+consumes that table, because a node carrying a source mesh gains one renderable
+child per primitive. That relationship has its own diagram in the hierarchy
+section below.
 
 Images are inserted in glTF image order, textures in texture order, and
 materials in material order. The importer can therefore translate a validated
@@ -221,9 +223,9 @@ The document's directory is passed to the parser, so a relative buffer URI is
 resolved beside the source document rather than against the application's
 working directory.
 
-The parser recognizes all extension grammars built into fastgltf, but release
-0.8 accepts no required extension. Recognizing first and
-rejecting second produces a specific error such as:
+The parser is configured to recognize every extension grammar understood by
+fastgltf, allowing it to finish parsing the document. The loader then rejects
+any required extension and can name that unsupported requirement explicitly:
 
 ```text
 Unsupported glTF data: required extension 'KHR_materials_transmission'
@@ -383,9 +385,11 @@ AnimationChannel                           v
         +-------- AnimationId + ChannelId -+
 ```
 
-Only `LINEAR` rotation channels are accepted. Input accessors must be float
-scalars, output accessors must be float `VEC4` values, neither may be sparse,
-and the sample counts must agree. Timestamps must increase strictly.
+Only `LINEAR` rotation channels are accepted. Each sampler's input accessor
+must contain scalar floating-point timestamps, while its output accessor must
+contain four-component floating-point quaternion values. Neither accessor may
+be sparse, their sample counts must match, and the timestamps must be strictly
+increasing.
 
 Imported quaternion values use glTF's `(x, y, z, w)` order and are normalised
 at the boundary. A zero, non-finite, or otherwise unusable value is rejected
@@ -406,8 +410,9 @@ playback policy to glTF import.
 ## Rebuild the selected hierarchy without duplicating mesh data
 
 glTF can identify a default scene. If it does not, the loader selects the first
-scene. Its root indices drive recursive node construction; other scene
-hierarchies are not instantiated.
+scene. Only that glTF scene definition is instantiated. It can still contain
+several root nodes, all of which are added to the engine `Scene`; alternative
+glTF scene definitions are ignored.
 
 For each selected node, the loader:
 
@@ -609,7 +614,7 @@ accepted.
 
 Check the surrounding channel contract: the target must be rotation,
 interpolation must be `LINEAR`, timestamps and values must have equal counts,
-and timestamps must increase strictly. Also check whether another channel or
+and the timestamps must be strictly increasing. Also check whether another channel or
 animation already targets the same source node; one node can carry only one
 `Animator` component at this stage.
 
