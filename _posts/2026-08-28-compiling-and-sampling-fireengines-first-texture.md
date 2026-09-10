@@ -20,7 +20,7 @@ The renderer needs a second representation with a different job. It must
 allocate device-preferred images, upload the selected pixels, establish their
 first usable layout, create image views and samplers, and bind the resulting
 pair while recording a draw. It must also preserve the existing preparation
-rule: resources are compiled because the current scene reaches them, not merely
+rule: resources are compiled because the current scene needs them, not merely
 because they exist in an asset collection.
 
 This part of release 0.8 crosses that boundary for one base-colour texture. The
@@ -48,10 +48,10 @@ consumed here.
 `RenderAssets` is a catalogue. It can contain images, textures, materials,
 meshes, and render objects that the current scene does not use. Compiling the
 whole catalogue would make an unused addition allocate GPU memory and would
-erase the reachability boundary established by `RenderPreparation`.
+erase the resource selection performed by `RenderPreparation`.
 
-Instead, preparation computes the transitive resource subset required by the
-scene's ordered render objects:
+Instead, preparation identifies the meshes, materials, textures, and images
+required by the scene's ordered render objects:
 
 ```text
 SceneDrawList + RenderAssets
@@ -177,10 +177,11 @@ image_{allocator, source.width, source.height,
            vk::ImageUsageFlagBits::eSampled}
 ```
 
-`eTransferDst` admits the upload copy. `eSampled` admits reads through a shader
-descriptor. Optimal tiling gives the implementation freedom to arrange the
-device image for GPU access, which is why CPU pixels cannot simply be copied
-into it as though it were another linear byte vector.
+`eTransferDst` allows the image to be the destination of the upload copy.
+`eSampled` allows a shader to sample it through a descriptor. Optimal tiling
+gives the implementation freedom to arrange the device image for GPU access,
+which is why CPU pixels cannot simply be copied into it as though it were
+another linear byte vector.
 
 See [`image.hpp`][source-image-header] and
 [`image.cpp`][source-image-cpp].
@@ -224,11 +225,10 @@ destroyed first; the image and its allocation are released afterwards.
 `kColorSubresourceRange` covers colour aspect, mip level zero, and array layer
 zero—the complete texture shape supported by this release.
 
-The sRGB format is also part of the data contract. The stored bytes describe
-sRGB colour. Sampling performs the format conversion into linear values before
-the shader multiplies them by its other colour factors. Keeping that choice at
-compilation avoids asking the loader to know how the renderer represents
-colour on a device.
+The loader supplies tightly packed RGBA8 pixels without choosing a Vulkan
+format. During compilation, the renderer stores base-colour images as
+`eR8G8B8A8Srgb`, so sampling converts their sRGB bytes into linear values before
+the shader multiplies them by the other colour inputs.
 
 ## Stage pixels before copying them to the image
 
@@ -267,11 +267,11 @@ host-visible staging buffer
 optimal-tiled device image
 ```
 
-One pending upload record is built for every selected image. The upload helper
-records all of them into one command buffer and submits them together. Waiting
-for that submission before returning gives the staging buffers a simple and
-provable lifetime: they can be destroyed when the local upload collection
-leaves scope.
+One pending upload record is built for every selected image. `uploadImages()`
+in [`compiled_resources.cpp`][source-compiled-resources] records all of them
+into one command buffer and submits them together. Waiting for that submission
+before returning gives the staging buffers a simple and provable lifetime:
+they can be destroyed when the local upload collection leaves scope.
 
 That synchronous choice favours a small setup path over streaming throughput.
 It is appropriate while preparation happens occasionally and the renderer has
@@ -283,22 +283,22 @@ See [`buffer.hpp`][source-buffer-header],
 
 ## Transition through the image's three real states
 
-A newly allocated image starts with an undefined layout. The transfer command
-needs it as a copy destination, and the fragment shader later needs it as a
-read-only sampled image:
+A newly allocated image starts with an undefined layout. The first barrier
+changes it to the transfer-destination layout, the copy writes the staged
+pixels without changing that layout, and the second barrier changes it to
+shader-read-only layout while making those writes visible to fragment
+sampling:
 
 ```text
 eUndefined
     |
-    | none -> copy / transfer write
+    | barrier 1: none -> copy / transfer write
     v
 eTransferDstOptimal
     |
-    | copyBufferToImage
-    v
-eTransferDstOptimal
+    | copyBufferToImage (layout unchanged)
     |
-    | copy / transfer write -> fragment / sampled read
+    | barrier 2: copy / transfer write -> fragment / sampled read
     v
 eShaderReadOnlyOptimal
 ```
@@ -321,9 +321,10 @@ const vk::ImageMemoryBarrier2 toTransfer{
 };
 ```
 
-The copy describes one tightly packed colour subresource. Leaving buffer row
-length and image height at zero tells Vulkan to derive tightly packed rows from
-the image extent:
+The copy describes one tightly packed colour subresource. In
+`vk::BufferImageCopy`, leaving `bufferRowLength` and `bufferImageHeight` at
+their default zero values tells Vulkan to derive tightly packed rows from the
+image extent:
 
 ```cpp
 const vk::BufferImageCopy copyRegion{
@@ -564,9 +565,10 @@ struct CompiledDraw
 };
 ```
 
-The scene draw list still supplies the current world transform and render
-object identity. The renderer combines that transient state with the compiled
-lookup, then pushes the texture pair for the draw:
+Each `DrawItem` supplies the current world transform and `RenderObjectId`. The
+renderer uses the ID to retrieve the compiled geometry, texture handles, and
+material colour, then records those values with the transform. The texture pair
+is pushed for the draw:
 
 ```cpp
 const detail::CompiledDraw draw =
@@ -594,8 +596,9 @@ the first sampled path direct even when adjacent draws happen to reuse the same
 handles.
 
 Material base colour remains a push constant beside the model matrix. The
-texture is a descriptor because sampling needs resource handles; the factor is
-plain per-draw data. Both meet again in the shader.
+texture uses a descriptor because sampling needs sampler and image-view
+handles; the material's base-colour factor is four numeric values carried in
+per-draw push constants. Both meet again in the shader.
 
 See [`compiled_resources.hpp`][source-compiled-resources-header] and the draw
 loop in [`renderer.cpp`][source-renderer].
@@ -781,12 +784,13 @@ while an earlier submission still owns it violates the setup protocol.
 This part of release 0.8 turns validated image descriptions into one complete
 sampled-texture path:
 
-- preparation continues to select the reachable resource subset before any
-  Vulkan allocation;
+- preparation continues to select the resources required by the selected
+  render objects before any Vulkan allocation;
 - `AllocatedImage` owns a Vulkan image and its VMA allocation together;
 - selected RGBA8 pixels compile into device-preferred, optimal-tiled sRGB
   images and colour views;
-- host-visible staging buffers bridge ordinary CPU vectors to those images;
+- host-visible staging buffers bridge decoded pixel bytes from ordinary CPU
+  `std::vector` storage to device-local images;
 - Synchronization 2 barriers move each image from undefined, through transfer
   destination, to fragment-shader read-only use;
 - one setup submission borrows the sole frame command buffer and fence only
