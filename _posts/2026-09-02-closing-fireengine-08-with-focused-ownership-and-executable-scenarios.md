@@ -148,8 +148,8 @@ changes. The renderer coordinates both without becoming their storage format.
 ## Build a complete resource candidate before replacing anything
 
 Compiled resources contain both owners and borrowers. A compiled texture owns
-a sampler but points to a compiled image. A compiled render-object entry points
-to its mesh and texture. Replacing those members independently could leave a
+a sampler but points to a compiled image. A compiled render object points to
+its mesh and texture. Replacing those members independently could leave a
 borrower referring to an owner already destroyed.
 
 Release 0.8 makes replacement a small transaction inside
@@ -165,14 +165,14 @@ Release 0.8 makes replacement a small transaction inside
                   |
              all succeeded
                   v
-3. commit in borrower-first order
+3. install in borrower-first order
    objects -> meshes -> fallback pair -> textures -> images
 ```
 
 No member of the current graph changes while allocation, staging, upload,
 sampler construction, or lookup construction can still fail. The candidate's
-`unique_ptr` owners keep their heap addresses when moved into the live graph,
-so the new borrowers remain valid across the commit.
+`unique_ptr` owners retain their heap addresses when moved into the live graph,
+so the borrowers still point to the same objects after replacement.
 
 The order during the final handoff is load-bearing. Replacing the render-object
 lookup first removes every old mesh and texture borrower before their owners
@@ -228,17 +228,20 @@ layer's performance suggestion is not a correctness failure. The scenarios can
 therefore reject a validation-reported lifetime violation rather than merely
 demonstrate that several frames happened to render.
 
-They use the normal [`main.cpp`][source-main], not a second test-only renderer:
-the same GLFW lifetime, window, loader, animation call, transform update,
-preparation operation, recording, submission, presentation, and shutdown as an
-interactive run. Only their inputs and bounded stopping conditions differ.
+The scenarios exercise the main application in [`main.cpp`][source-main], not a
+second test-only renderer: the same GLFW lifetime, window, loader, animation
+call, transform update, preparation operation, recording, submission,
+presentation, and shutdown as an interactive run. Only their inputs and
+bounded stopping conditions differ.
 
 ## Exercise the hardest composition with repeated preparation
 
-`prepare-twice` creates the most demanding ownership transition in the suite.
-The first frame uses the original imported resources. The application then
-adds an untextured material and render object, attaches a translated instance
-to the scene, updates world transforms, and calls `prepare()` again.
+The suite has four device-backed application scenarios: `basic`,
+`prepare-twice`, `untextured`, and `resize`. Of those, `prepare-twice` creates
+the most demanding ownership transition. The first frame uses the original
+imported resources. The application then adds an untextured material and render
+object, attaches a translated instance to the scene, updates world transforms,
+and calls `prepare()` again.
 
 ```text
 prepare original graph
@@ -249,7 +252,7 @@ mutate assets + add scene dependency
         |
 retire device work + presentation work
         |
-build and commit replacement graph
+build and install replacement graph
         |
 draw and present frames 2, 3, and 4
 ```
@@ -257,25 +260,31 @@ draw and present frames 2, 3, and 4
 This proves more than calling `prepare()` twice before drawing. The original
 compiled buffers, images, samplers, and lookup have been consumed by submitted
 commands, and presentation may still own work ordered after that submission.
-The renderer must retire both completion domains before releasing the old
-graph or reusing its frame upload context.
+Before releasing the old graph or reusing the frame's upload context, the
+renderer must wait for both submitted rendering and queued presentation
+operations to finish.
 
-The remaining three frames revisit the replacement in the normal draw path.
-They commonly revisit all three presentation-fence entries on the observed
-swapchain, but the scenario does not turn that observation into a portable
-claim: swapchain image count and acquisition order remain driver-selected.
+After preparation, three more frames exercise the replacement through ordinary
+drawing and presentation. On a three-image swapchain those frames may use all
+three presentation fences, but that is not a test guarantee: Vulkan lets the
+driver choose both the swapchain image count and acquisition order.
 
-This scenario found a real protocol gap. Whole-group retirement waited for a
-submitted presentation fence and cleared its bookkeeping, but originally left
-the signalled fence unchanged. A later presentation could then submit that
-already-signalled fence again. Both per-image reuse and whole-group retirement
-now call the same `preparePresentFence()` operation, which waits, resets, and
-clears one submitted entry consistently.
+This scenario found a real protocol gap. `waitForPresentations()` waited for
+each submitted presentation fence and cleared its bookkeeping, but originally
+left the signalled fence unchanged. A later presentation could then submit that
+already-signalled fence again, violating
+[Vulkan's requirement][vulkan-present-fence] that a presentation fence be
+unsignalled when submitted and causing a validation error. Both ordinary
+per-image reuse and the wait before presentation-state replacement now call the
+same `preparePresentFence()` operation, which waits, resets, and clears one
+submitted entry consistently.
 
-The important testing lesson is not the particular bug. It is that preserving
-`PresentationState` while replacing compiled content creates a lifetime
-composition that neither a preparation unit test nor a recreation-only test
-can exercise alone.
+The important testing lesson is not the particular bug. Preserving
+`PresentationState` while replacing compiled content exercises an interaction
+that neither a preparation unit test nor a recreation-only test can cover
+alone: submitted rendering and presentation must finish before the old compiled
+owners are released and the shared frame context is reused for uploading their
+replacements.
 
 ## Use smaller scenarios to cover the remaining composition risks
 
@@ -328,7 +337,7 @@ development, a positive-control run temporarily removed the
 `prepare-twice` registrations. Both produced the validation-error prefix and
 failed through CTest's regular-expression gate.
 
-The same mutation can be exercised against a Debug build of 0.8 with:
+The same temporary fault can be exercised against a Debug build of 0.8 with:
 
 ```console
 ctest --test-dir build -C Debug \
@@ -336,24 +345,27 @@ ctest --test-dir build -C Debug \
   --output-on-failure
 ```
 
-The recreation registrations stayed green under that fault. That difference
-located the missing reset in the path that preserves a `PresentationState`
-across post-present resource preparation. Recreation destroys the old state,
-so it does not reuse the same signalled fence.
+The recreation registrations stayed green under that fault, while both
+`prepare-twice` variants failed. That isolated the missing reset to the path
+that reuses the same `PresentationState` after presenting a frame and then
+preparing new resources. Recreation discards the old state, so it does not
+reuse the same signalled fence.
 
-The injected fault is not part of release 0.8. The reproducible recipe is the
-one-line removal and those two named tests; the mutation was restored after the
-run. The original full validation message and device environment were not
-retained, however, so this remains an author-reported experiment rather than a
-result independently recoverable from the tag. That distinction matters:
-validation behaviour can depend on the implementation, and the matched message
-is what would let another reader recognise the same failure.
+The injected fault is not part of release 0.8. It can be reproduced by
+temporarily removing the one `resetFences()` call and running those two tests;
+the call was restored after the experiment. The original full validation
+message and device environment were not retained, however, so this remains an
+author-reported experiment rather than a result independently recoverable from
+the tag. That distinction matters: validation behaviour can depend on the
+implementation, and the matched message is what would let another reader
+recognise the same failure.
 
 Future positive controls should retain the exact patch, command, validation
-message, and device and driver environment. The environment limits the claim
-rather than merely documenting its provenance. The invalid code itself should
-still be removed after the experiment; a small recipe is more useful than a
-permanent broken mode.
+message, device, and driver. Those environment details define the scope of the
+result: a validation failure observed on one implementation does not establish
+identical behaviour everywhere. The invalid code should still be removed after
+the experiment; a small reproduction recipe is more useful than leaving an
+intentionally broken code path in the project.
 
 ## Let asymmetric evidence support one conclusion
 
@@ -435,6 +447,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [source-depth-header]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/render/detail/depth_buffer.hpp>
 [source-subresource-ranges]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/include/fire_engine/render/detail/image_subresource_ranges.hpp>
 [source-present-fence-reset]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/render/renderer.cpp#L715-L729>
+[vulkan-present-fence]: <https://docs.vulkan.org/refpages/latest/refpages/source/VkSwapchainPresentFenceInfoKHR.html>
 [source-main]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/main.cpp>
 [source-debug]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/src/core/debug.cpp>
 [source-cmake]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.8/CMakeLists.txt>

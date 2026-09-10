@@ -392,10 +392,10 @@ return Quaternion{
     .normalized();
 ```
 
-The sign choice gives the shortest quaternion arc. Normalisation returns a unit
-quaternion suitable for matrix conversion even when imported endpoints contain
-small numerical error. Exact endpoint branches are normalized for the same
-reason rather than trusting source data only between samples.
+The sign choice selects the shortest quaternion arc. `normalizedLerp()` returns
+a unit quaternion suitable for matrix conversion. `sampleRotation()` also
+normalizes the first and last samples when returning them directly, so every
+playback-time path has the same unit-quaternion guarantee.
 
 This is normalized linear interpolation, or nlerp. It does not provide the
 constant angular velocity of spherical interpolation. glTF describes spherical

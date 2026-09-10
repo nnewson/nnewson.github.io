@@ -72,16 +72,17 @@ long-lived renderer
 
 The split follows dependency rather than convenience:
 
-| State | Why it is replaced or preserved |
-| --- | --- |
-| Swapchain and image views | surface capabilities, extent, format, and image count can change |
-| Per-image render-finished semaphores | their count and reuse follow acquired swapchain images |
-| Depth buffer | its image must match the new rendering extent |
-| Pipeline | dynamic rendering requires compatible colour and depth formats |
-| Presentation fences | one completion fence belongs to each new swapchain image |
-| Frame slot | its command pool, acquisition semaphore, submission fence, and uniform buffer remain usable |
-| Compiled scene resources | meshes, textures, samplers, and materials do not depend on window size |
-| Preparation cache | scene reachability and asset revisions do not change during a resize |
+| State | During recreation | Why |
+| --- | --- | --- |
+| Swapchain, images, and views | Replaced | surface capabilities, extent, format, and image count can change |
+| Render-finished semaphores | Replaced | their count and reuse follow the new swapchain images |
+| Depth buffer | Replaced | its dimensions must match the new extent |
+| Pipeline | Replaced | its colour and depth formats must match the new attachments |
+| Presentation fences | Replaced | one fence is created for each new swapchain image |
+| Device and allocator | Preserved | their ownership and capabilities remain valid |
+| Frame slot | Preserved; uniform updated | its Vulkan objects remain usable, but the projection changes with the extent |
+| Compiled scene resources | Preserved | meshes, textures, samplers, and materials do not depend on window size |
+| Preparation cache | Preserved | neither scene dependencies nor asset revisions changed |
 
 This is the organising decision for the whole feature. If swapchain-derived
 objects remain scattered among long-lived members, recreation becomes a list
@@ -152,10 +153,10 @@ The renderer facade exposes one operation:
 [[nodiscard]] bool recreatePresentation(const Window& window);
 ```
 
-The application supplies the window whose current framebuffer selects the new
-extent. A `true` result means replacement succeeded. `false` means the
-framebuffer is currently zero-sized, a normal transient state while a window is
-minimised rather than a rendering error.
+The application supplies the window, whose current framebuffer provides the
+requested extent. A `true` result means replacement succeeded. `false` means
+the framebuffer is currently zero-sized, a normal transient state while a
+window is minimised rather than a rendering error.
 
 The method does not ask the caller to pass an old swapchain, wait on fences,
 rebuild a depth image, or choose a compatible pipeline. Those are Vulkan
@@ -424,16 +425,17 @@ make the old presentation objects safe to retire.
 
 ## Require the presentation-fence capability explicitly
 
-Presentation fences come from `VK_KHR_swapchain_maintenance1`, or the
-equivalent earlier `VK_EXT_swapchain_maintenance1` path. The renderer does not
-silently assume either one exists.
+Presentation fences are not part of core Vulkan 1.4. They are provided by
+`VK_KHR_swapchain_maintenance1` or its earlier
+`VK_EXT_swapchain_maintenance1` version. Release 0.8 prefers the newer KHR
+extension but retains the EXT path for implementations that expose only the
+original version.
 
-Instance setup requires extended surface capabilities and at least one matching
-surface-maintenance variant. Physical-device inspection then requires the
-corresponding swapchain-maintenance extension and queries the
-`swapchainMaintenance1` feature. Logical-device creation enables the selected
-extension and feature. The KHR path is preferred; EXT keeps the same retirement
-contract available on implementations from before the KHR promotion.
+Each swapchain-maintenance extension needs its matching instance-level
+surface-maintenance extension, together with extended surface-capability
+queries. Startup therefore looks for a complete KHR or EXT path, queries the
+`swapchainMaintenance1` feature, and enables the corresponding device
+extension and feature.
 
 This is a real increase in fireEngine's minimum device requirements. The
 extension is not enabled for an optional convenience: the renderer's destruction
@@ -447,8 +449,8 @@ See capability selection in [`debug.cpp`][source-debug] and
 ## Give each acquired image one reusable presentation fence
 
 `PresentationState` creates an unsignalled fence and a submitted flag for every
-swapchain image. Before image `k` reuses its fence, the renderer checks whether
-an earlier present was associated with it:
+swapchain image. Before the fence associated with an acquired `imageIndex` is
+reused, the renderer checks whether an earlier presentation submitted it:
 
 ```cpp
 if (presentSubmitted_.at(imageIndex) == 0)
@@ -484,8 +486,11 @@ const vk::PresentInfoKHR presentInfo{
 ```
 
 After `presentKHR()` returns, the image's submitted flag records that the fence
-will need retirement. The out-of-date exception path records it too because an
-out-of-date result still enqueues the presentation operation and its fence.
+will need retirement. `presentKHR()` can throw `vk::OutOfDateKHRError` when,
+for example, a resize makes the swapchain incompatible with the surface. That
+exception path marks the fence as submitted too: Vulkan has still enqueued the
+presentation operation and its associated fence, even though the application
+records no presented image.
 
 At ordinary image reuse, `preparePresentFence(imageIndex)` waits and resets one
 entry. Before replacement or shutdown, `waitForPresentations()` applies the
@@ -646,7 +651,9 @@ operation:
 - the renderer checks zero extent again to close the event-loop race;
 - old device work and presentation operations are both retired before
   replacement;
-- `oldSwapchain` is offered to Vulkan while the old C++ owner remains alive;
+- the old swapchain remains owned and alive while its handle is passed to
+  Vulkan to create the replacement; it is destroyed only after replacement
+  construction succeeds;
 - depth, attachment-compatible pipeline, viewport state, and camera projection
   follow the replacement extent and formats;
 - presentation fences are required through the KHR or equivalent EXT
