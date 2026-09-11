@@ -48,6 +48,36 @@ a workload-dependent policy rather than a universal architectural choice.
 > change without rewriting the evidence as a predetermined sequence.
 {: .prompt-info }
 
+## Introducing the measurement vocabulary
+
+The questions below are answered by measurement, so the words describing how a
+number was obtained matter as much as the number:
+
+- **Lavapipe** is Mesa's CPU implementation of Vulkan. It renders without a GPU,
+  which is what lets continuous integration run the real device path on a
+  machine that has no graphics hardware. Its absolute timings are not
+  comparable with a hardware driver;
+- a **decision-bearing implementation** is a mature, conformant one whose
+  behaviour is considered sound enough to base an architectural decision on.
+  Lavapipe and the NVIDIA driver both qualify here;
+- **A/X/B** is the ordering every measurement uses: a control run `A`, the
+  candidate `X`, then a second control `B`, all from one binary in one session.
+  The baseline is `C = (A + B) / 2`;
+- **control drift** is the gap between those two controls, `abs(B - A)`. It is
+  the machine's own variation between two runs of identical code, and a
+  candidate closer to the baseline than that is **unresolved within drift** —
+  it supports no directional claim;
+- **active work** is the host work a frame performs as the coordinating thread
+  observes it, excluding time blocked waiting for presentation, so a slow
+  display cannot disguise a change in CPU cost; and
+- **materialisation** is the share of a predicted improvement that measurement
+  actually delivers. A model predicting a 40% reduction that measures 20% has
+  materialised half of it.
+
+A **registered** rule is one written down with its threshold before the
+measurement that tests it, so a disappointing result cannot be rescued by
+moving the bar afterwards.
+
 ## What pressure 0.9 responds to
 
 The 0.8 renderer already separates application descriptions, prepared
@@ -410,7 +440,7 @@ evidence supports it and keeps the one-participant path where it does not.
   performance context for distinguishing CPU headroom from visible frame-rate
   change.
 
-The [Reading page][reading-page] keeps the site-wide list in one place.
+The [Reading page][reading-page] keeps the site-wide list in one place, and the [Terminology page][terminology-page] collects the definitions above.
 
 [release-0-8]: {{ page.previous_release_url }}
 [release-0-9]: {{ page.release_url }}
@@ -425,3 +455,4 @@ The [Reading page][reading-page] keeps the site-wide list in one place.
 [reading-cpp-design]: <https://www.oreilly.com/library/view/c-software-design/9781098113155/>
 [reading-real-time-rendering]: <https://www.realtimerendering.com/>
 [reading-page]: {% link _tabs/reading.md %}
+[terminology-page]: {% link _tabs/terminology.md %}
