@@ -69,11 +69,19 @@ A number without them is an assertion with a decimal point. Say what the
 measurement does *not* cover — a result on one implementation limits the
 claim, it does not merely record where it came from.
 
-**Experiments** — a deliberate temporary change made to learn something —
-record all of:
+**Experiments** — a deliberate change made to learn something — divide by
+whether the code is reachable from the release tag.
 
-- that it was a temporary local mutation, since it is not in the tag;
-- the exact change, or a link to the affected lines;
+*If it survives in the tag's ancestry*, link the immutable commit and record
+the command, environment, and result. A superseded spike and a formally
+reverted change both qualify: `git revert` adds a commit, it does not remove
+one.
+
+*If it never entered that ancestry* — local-only work, squashed history, or a
+deleted branch — retain a small reproduction record instead:
+
+- that the change is not in the tag, so the result is author-reported;
+- the exact change, or a patch;
 - the precise command and the named test registrations;
 - the device and driver environment;
 - what failed, what stayed green, and the message that identified it;
