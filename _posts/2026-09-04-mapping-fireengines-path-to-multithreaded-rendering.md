@@ -15,16 +15,16 @@ Release 0.8 gave fireEngine a complete path from an animated glTF file to a
 presented frame. Its ownership boundaries were visible in the facade and
 executable through the scenario suite, but the work behind each frame remained
 serial. Image uploads borrowed the sole frame slot, one submission could be in
-flight, and one CPU participant recorded every draw.
+flight, and one CPU thread recorded every draw.
 
 The tempting 0.9 story is therefore simple: add another thread and make command
 recording faster. The released result is more conditional. Two recording
-participants helped both measured implementations at 10,000 synthetic draws,
-but the same split ran at `0.912x`, or 9.7% slower, at 1,000 draws on the
-NVIDIA system. Several temporary controls answered their questions and were
-removed; a flat transform
-pass failed its retention rule; and the first worker measurement failed the
-registered release gate.
+threads helped both measured implementations at 10,000 synthetic draws, but at
+1,000 draws the implementations disagreed: one improved while the other became
+slower. Several experiments were rejected rather than becoming part of the
+release. Replacing recursive transform traversal with a flat forward pass was
+slower at 10,000 draws, while the first two-thread design did not improve both
+selected workloads enough to keep.
 
 This cannot honestly be a forward-looking plan in the style of the 0.7 and 0.8
 introductions. Version 0.9 is already tagged, and its interesting decisions
@@ -57,12 +57,11 @@ number was obtained matter as much as the number:
   which is what lets continuous integration run the real device path on a
   machine that has no graphics hardware. Its absolute timings are not
   comparable with a hardware driver;
-- a **decision-bearing implementation** is a mature, conformant one whose
-  behaviour is considered sound enough to base an architectural decision on.
-  Lavapipe and the NVIDIA driver both qualify here;
+- a **decision-bearing implementation** is one declared in advance as eligible
+  to affect the decision to retain or reject a change;
 - **A/X/B** is the ordering every measurement uses: a control run `A`, the
-  candidate `X`, then a second control `B`, all from one binary in one session.
-  The baseline is `C = (A + B) / 2`;
+  candidate `X`, then a second control `B`, all using the same executable in one
+  session. The baseline is `C = (A + B) / 2`;
 - **control drift** is the gap between those two controls, `abs(B - A)`. It is
   the machine's own variation between two runs of identical code, and a
   candidate closer to the baseline than that is **unresolved within drift** —
@@ -78,6 +77,21 @@ A **registered** rule is one written down with its threshold before the
 measurement that tests it, so a disappointing result cannot be rescued by
 moving the bar afterwards.
 
+Three environments contribute different kinds of evidence:
+
+| Environment | Classification | Role in the decision |
+|---|---|---|
+| Ubuntu GitHub Actions with Mesa Lavapipe 25.2.8 | software Vulkan implementation | decision-bearing continuous measurement |
+| Intel i5-8300H and GeForce GTX 1050 with NVIDIA 580.173.02 | hardware Vulkan implementation | decision-bearing hardware measurement |
+| Apple M2 Pro with the KosmicKrisp technical preview | preview Vulkan implementation | correctness and longitudinal observation only |
+
+KosmicKrisp can expose a portability or validation problem, but its preview
+measurements do not choose the released worker policy. That distinction is
+registered before looking at a result, just like the numerical gates.
+
+The [Terminology page][terminology-page] collects these definitions with the
+engine and testing vocabulary used across the fireEngine posts.
+
 ## What pressure 0.9 responds to
 
 The 0.8 renderer already separates application descriptions, prepared
@@ -87,31 +101,47 @@ test of that architecture:
 
 - resource uploads borrow the command pool and fence used for the only frame;
 - submission ownership and command-recording ownership are combined; and
-- command recording reads a scene-derived list without a type that limits a
-  worker to recording alone.
+- command recording consumes scene-derived data without a narrow input type
+  containing only the handles and values another thread needs to record
+  commands.
 
 The goal is not merely to remove those seams. It is to make mutation and
 ownership phases explicit enough that adding a recording participant changes
 scheduling without reopening resource ownership.
 
-That requires keeping four different kinds of depth separate:
+That requires keeping four independent concurrency counts separate:
 
-| Kind of depth | Released 0.9 result |
-|---|---|
-| CPU frames being prepared concurrently | one |
-| submitted Vulkan frames that may remain outstanding | two |
-| CPU participants recording one frame | one or two, selected by workload |
-| images retained for presentation | driver-selected |
+| Count | What it describes | Released 0.9 result |
+|---|---|---|
+| application frame states | scene and animation states being updated concurrently | one |
+| Vulkan frame slots | submitted frames whose GPU work may remain outstanding | two |
+| recording participants per frame | CPU threads recording command buffers for the same frame | one or two, selected by draw count |
+| swapchain images | presentable images managed by the Vulkan implementation | driver-selected |
 
-Two Vulkan frame slots do not mean two application frames are being mutated at
-once, and a three-image swapchain does not choose either number. The application
-still mutates, freezes, records, submits, and presents one frame in order. The
-second submission slot permits CPU/GPU overlap; the second recording participant
-may only read one already-frozen frame.
+The application advances one scene and animation state at a time. Two Vulkan
+frame slots let the CPU prepare a later submission while the GPU completes an
+earlier one. Independently, two recording participants may divide the command
+recording for the same application frame. The swapchain image count and the
+image index returned by acquisition choose which presentable image is used;
+they do not choose either of those concurrency counts.
+
+In this post, the **coordinator** is the main rendering thread. It owns the
+primary command buffer, queue submission, and presentation. A primary command
+buffer begins rendering and executes secondary command buffers. The
+coordinator and an optional **helper** may each record a different range of
+draws into one of those secondary buffers. Both threads are recording
+**participants**, but the helper cannot submit or present the frame.
+
+A **frozen frame** means that scene mutation, transform resolution, and
+resource lookup have finished. Both participants receive the resulting
+immutable `RecordingInput`; neither reads or modifies the live scene while
+recording.
 
 ## What had to be true before a measurement meant anything
 
-A coarse frame duration cannot tell us whether command recording is divisible.
+A total frame duration cannot show how much CPU time belongs to command
+recording, or whether enough of that work can run concurrently to outweigh the
+cost of involving another thread.
 Presentation pacing may hide an active-work reduction, and a driver may perform
 secondary-command work during recording, execution, submission, or command-pool
 reset. Adding a thread before separating those phases would attach a speedup
@@ -127,20 +157,27 @@ The report separates transform resolution, draw-list construction,
 recording-input compilation, frame-uniform update, command-pool resets, primary
 and secondary recording, secondary execution, submission, and blocking waits.
 “Active work” excludes presentation blocking, so the worker decision is based
-on CPU work it could actually shorten rather than on refresh pacing.
+on CPU work it could actually shorten rather than on time spent waiting for the
+presentation system or the monitor.
 
-Comparisons use a one-participant A, two-participant X, one-participant B
-sequence in the same binary and environment. The difference between A and B is
-the control drift against which X must resolve. Hardware, driver, build
-configuration, workload, run count, and timing boundaries travel with every
-result; absolute values do not travel between machines.
+Each candidate uses the A/X/B sequence defined above. The difference between
+`A` and `B` is its drift allowance; `X` supports a directional claim only when
+its distance from their mean exceeds that allowance. Every reported result
+records its hardware, driver, build configuration, workload, run count, and
+timing boundaries. Ratios are compared within one controlled acquisition; raw
+timings are not compared across machines.
 
 One more control records all draws directly into the primary command buffer.
-It attributes costs surrounding secondary commands, but it is not a competing
-production renderer. Keeping the control in the same binary makes disagreement
-observable without making a benchmark switch part of the public architecture.
+Comparing it with one-participant secondary recording helps locate costs
+introduced by the secondary-command structure. Both modes run through the same
+executable and surrounding frame path, avoiding a comparison between different
+builds. The flag exists for measurement and is not an alternative automatic
+renderer policy.
 
 ## Can secondary recording work before it can be faster?
+
+The completed functional investigation is covered in the
+[secondary-command post][secondary-command-post].
 
 The first uncertainty is functional. Can a primary command buffer begin dynamic
 rendering, execute inherited secondary command buffers with the correct colour
@@ -162,7 +199,7 @@ This question therefore needs a validation method, not a speedup graph. Prove
 that the structure is legal first; preserve different driver observations; then
 measure the production form after its ownership is correct.
 
-## Where does the worker-divisible CPU time actually live?
+## Where does worker-eligible CPU time actually live?
 
 The phase harness answers several questions with one method:
 
@@ -180,11 +217,13 @@ handles change and push a sampled-image descriptor only when its sampler or
 image view changes. That reduced real work before concurrency and prevented the
 worker prediction from counting redundant commands as an opportunity.
 
-Ownership then corrected the measurement model. A shared command pool made its
-reset impossible to assign honestly to either a coordinator or a future worker.
-A temporary split showed that reset cost belongs with the context that records
-that pool. No draw became faster, but work previously classified as serial
-became attributable to a recording participant.
+Ownership then corrected the measurement model. At this stage the primary and
+secondary command buffers shared a pool, so the combined reset timing could not
+show which recording context was responsible for the cost. A temporary
+split-pool control tested that attribution directly and showed that reset cost
+belongs with the context that records from the pool. No draw became faster, but
+work previously classified as coordinator-only could now be assigned to a
+recording participant.
 
 The result was not portable in magnitude. At 10,000 draws, worker-pool reset was
 54.02% of active work on Lavapipe and 0.25% on the NVIDIA driver. The same
@@ -201,10 +240,10 @@ paired measurement, not an answer 0.9 can infer from isolated runs.
 ## Which boundaries can be justified without timing?
 
 The phase measurements identify command-pool reset and secondary recording as
-the candidate divisible region. That creates a different kind of question: can
-exactly that region be handed to another participant without also handing it
-mutable resource ownership, submission authority, or CPU data that expires too
-early? Timings cannot answer that.
+the candidate region for parallel recording. That creates a different kind of
+question: can exactly that region be handed to another participant without
+also handing it mutable resource ownership, submission authority, or CPU data
+that expires too early? Timings cannot answer that.
 
 The application also builds a `SceneDrawList` in a reusable arena before it
 enters the renderer. The returned value is an immutable span, not an owning
@@ -226,14 +265,14 @@ resource mutation, submission, presentation, and destruction authority from a
 recording participant instead of relying on a comment asking the thread to be
 careful.
 
-The same measured region gives each recording context ownership of the command
-pool it resets. A participant can therefore prepare its own pool without
-receiving submission authority or asking the coordinator to perform worker
-setup serially.
+Each recording context therefore owns and resets the command pool backing its
+secondary command buffer. The helper can prepare its own recording resources,
+while the coordinator retains sole control of the primary command buffer,
+queue submission, and presentation.
 
 That is the measurement-driven half of the boundary work: isolate the region
-the phase model says may divide, then give it only the data and authority it
-needs.
+the phase model says could run concurrently, then give it only the data and
+authority it needs.
 
 The other half pays debts already named by the
 [0.8 architecture][architecture-0-8]. Setup uploads borrowed the only frame's
@@ -278,14 +317,21 @@ change the production path being measured. Registering a gate against the
 earlier one-participant denominator would ask new code to satisfy a prediction
 about code that no longer exists.
 
-Only after that production path was remeasured could its serial fraction
-predict an ideal two-participant ceiling. The release registered two different
-decisions before adding the helper:
+Only after that production path was remeasured could the share of active work
+eligible for parallel recording predict an ideal two-participant result. The
+release registered two different decisions before adding the helper:
 
-1. attempt parallel recording only if the divisible share implied at least a
-   `1.15x` ideal two-participant result; and
-2. retain it only if measured work materialised at least half of the predicted
+1. attempt parallel recording only if a perfect two-way split of the eligible
+   work predicted at least a `1.15x` ideal result; and
+2. retain it only if measurement delivered at least half of the predicted
    reduction at both workloads on a decision-bearing implementation.
+
+The first rule avoids adding thread coordination when even a perfect split
+predicts less than a 15% improvement. The second requires a real implementation
+to deliver a meaningful share of that prediction at both selected workloads,
+rather than retaining the mechanism for one favourable result. The detailed
+posts will show how the eligible share and thresholds were calculated and how
+the gate was exercised.
 
 The first implementation of the persistent
 [`SecondaryRecordingWorker`][source-worker] did not clear that retention rule.
@@ -296,25 +342,30 @@ resuming late from its completion wait.
 One pre-registered remediation allowed the coordinator to poll completion for
 at most 50 microseconds before falling back to an atomic wait. It did not spin
 while the helper waited between frames, sweep several durations, or permit
-further tuning if the gate still failed. The repeat produced the released
-result:
+further tuning if the gate still failed. After that single allowed change, the
+full A/X/B measurements were repeated.
+
+Each multiplier below is the mean one-participant active-work time from `A` and
+`B`, divided by the two-participant time from `X`. A value above `1.0x` is
+faster; one below `1.0x` is slower.
 
 | Implementation | 1,000 draws | 10,000 draws |
 |---|---:|---:|
 | Mesa Lavapipe | `1.374x` | `1.700x` |
 | NVIDIA 580.173.02 | `0.912x` | `1.209x` |
 
-The Lavapipe results came from the Ubuntu GitHub Actions llvmpipe environment,
-Mesa 25.2.8, Release, 800x600 Mailbox presentation, with 16 warm-up and 64
-measured frames per arm. Its initial 1,000-draw remediation acquisition was
-discarded under the registered drift rule; one permitted same-commit
-replacement acquisition supplied the resolved value above.
+The Lavapipe measurements used a Release build at 800x600 with Mailbox
+presentation, 16 warm-up frames, and 64 measured frames per arm. Its first
+1,000-draw A/X/B run after the remediation was unusable because the two
+one-participant controls differed by 57.12%. The registered drift rule
+therefore discarded it. One permitted replacement A/X/B run supplied the
+`1.374x` result above; no further retries were allowed.
 
 The NVIDIA measurements used an Intel i5-8300H and GeForce GTX 1050, driver
 580.173.02, Release, 800x600 FIFO presentation, with the CPU governor fixed to
 performance on AC power. The same A/X/B ordering and frame counts applied.
-Every retained cell resolved against the difference between its two
-one-participant controls.
+Every reported implementation-and-workload result differed from its
+one-participant baseline by more than the drift between its two controls.
 
 The disagreement is the result, not noise to average away. Parallel recording
 helped both implementations at 10,000 draws and ran at `0.912x`, or 9.7%
@@ -337,20 +388,23 @@ it.
 | parallel recording is universally faster | NVIDIA regressed at 1,000 draws |
 | the crossover occurs at 10,000 draws | only 1,000 and 10,000 were decision workloads |
 | the result represents arbitrary scenes | the synthetic workload repeats one cube and is unusually easy to divide evenly |
-| active-work speedup is the same as frame-rate improvement | presentation waits and refresh pacing are contextual rather than part of the worker gate |
+| active-work speedup is the same as frame-rate improvement | presentation waits and monitor or compositor pacing are reported separately and excluded from the worker gate |
 | more workers will continue scaling | the release measures only a coordinator and one helper |
 | every Vulkan implementation places cost in the same phase | Lavapipe and NVIDIA disagree sharply about command-pool reset |
 
-The remaining serial fraction matters more as worker count grows. On NVIDIA at
-10,000 draws, more than half of active work is the immutable snapshot phase. It
-caps the measured unlimited-worker ideal at about `1.744x`, however cheaply
-additional command recording could be divided.
+The portion of active work that recording helpers cannot shorten matters more
+as their number grows. On NVIDIA at 10,000 draws, more than half of active work
+is the immutable recording-input snapshot phase. Even with unlimited,
+cost-free recording participants, that measured non-recording work limits the
+theoretical active-work speedup to about `1.744x`.
 
-Aggregate CPU work may also rise while elapsed critical-path time falls. That
-is a normal trade in parallel work, but 0.9 does not diagnose how much of its
-increase comes from driver contention, cache behaviour, CPU frequency, or
-command allocation. The release records those candidates without selecting the
-most convenient explanation.
+The coordinator and helper run concurrently, so their CPU durations can add up
+to more than the one-participant duration even while the elapsed recording
+phase becomes shorter. The optimization targets elapsed time on the critical
+path, not the total amount of CPU work performed. Version 0.9 does not diagnose
+how much of that additional work comes from driver contention, cache behaviour,
+CPU frequency, or command allocation; it records those candidates without
+selecting the most convenient explanation.
 
 KosmicKrisp remains valuable correctness and longitudinal evidence, but the
 measured technical preview did not choose the worker policy. Two
@@ -388,13 +442,16 @@ cmake --build --preset default
 ./build/fireEngineTutorial --benchmark 10000 --recording-threads 1
 ./build/fireEngineTutorial --benchmark 10000 --recording-threads 2
 ./build/fireEngineTutorial --benchmark 10000 --recording-threads 1
+
+./build/fireEngineTutorial --benchmark 10000 --direct-primary
 ```
 
 Those commands reproduce the method, not the published numbers. A comparison
 needs the same machine, driver, presentation setup, build, and background load.
 The executable reports that environment with its phases. The ordinary
-`--benchmark 10000` form exercises the automatic policy; `--direct-primary`
-selects the attribution control.
+`--benchmark 10000` form exercises the automatic policy. The final command
+records every draw directly into the primary command buffer, providing a
+diagnostic comparison with the normal secondary-command path.
 
 ## Where this leaves the architecture
 
@@ -447,6 +504,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place, and the 
 [architecture-0-8]: {% link _architecture/0.8.md %}
 [architecture-0-9]: {% link _architecture/0.9.md %}
 [closing-0-8-post]: {% post_url 2026-09-02-closing-fireengine-08-with-focused-ownership-and-executable-scenarios %}
+[secondary-command-post]: {% post_url 2026-09-12-proving-fireengines-secondary-command-path-before-measuring-it %}
 [source-benchmark]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/src/app/benchmark.cpp>
 [source-recording-input]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/recording_input.hpp>
 [source-worker]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/secondary_recording_worker.hpp>

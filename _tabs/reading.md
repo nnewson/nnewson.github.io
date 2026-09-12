@@ -156,6 +156,11 @@ the tutorial, covering manifests, registries, versioning, and CMake integration.
 The Vulkan reference definition of clockwise and counter-clockwise front faces
 after projection into framebuffer coordinates.
 
+### [`VkCommandBufferInheritanceRenderingInfo` reference](https://docs.vulkan.org/refpages/latest/refpages/source/VkCommandBufferInheritanceRenderingInfo.html)
+
+The Vulkan reference for the attachment formats, sample count, and view mask a
+secondary command buffer inherits when it executes inside dynamic rendering.
+
 ### [`VK_KHR_swapchain_maintenance1` reference](https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_swapchain_maintenance1.html)
 
 The Vulkan extension reference for presentation fences, explicit image release,
@@ -204,6 +209,11 @@ configuration.
 
 The normative path from clip coordinates through perspective division,
 clipping, and viewport transformation into rasterization.
+
+### [Vulkan specification: Command Buffers](https://docs.vulkan.org/spec/latest/chapters/cmdbuffers.html)
+
+The normative definition of primary and secondary command buffers, recording,
+execution, inheritance, usage flags, and command-pool synchronization.
 
 ### [Vulkan specification: Push Descriptors](https://docs.vulkan.org/spec/latest/chapters/descriptorsets.html)
 

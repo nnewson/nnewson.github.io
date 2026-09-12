@@ -5,7 +5,7 @@ order: 6
 
 Terms that recur across the fireEngine posts and are specific to this project
 or its tooling. Vulkan's own vocabulary is defined by the
-[specification](https://registry.khronos.org/vulkan/specs/latest/html/) and is
+[specification](https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html) and is
 not repeated here; what follows is the set a competent Vulkan reader would
 still have to guess at.
 
@@ -41,8 +41,8 @@ presentation code runs rather than being skipped.
 
 ### Decision-bearing implementation
 
-A mature, conformant Vulkan implementation whose behaviour is considered sound
-enough to base an architectural decision on. A measurement from a prototype or
+A Vulkan implementation declared in advance as eligible to affect the decision
+to retain or reject a change. A measurement from a preview implementation or
 an unusual configuration may be informative without being decision-bearing.
 
 ## Measurement
@@ -50,8 +50,8 @@ an unusual configuration may be informative without being decision-bearing.
 ### A/X/B
 
 The measurement ordering used for every performance claim. A control run `A`,
-then the candidate `X`, then a second control `B`, all from the same binary in
-one session. The control baseline is `C = (A + B) / 2`.
+then the candidate `X`, then a second control `B`, all using the same executable
+in one session. The control baseline is `C = (A + B) / 2`.
 
 ### Control drift
 
@@ -98,12 +98,26 @@ gate detects the defect it claims to.
 
 ## Engine and testing vocabulary
 
+### Synchronization validation
+
+An optional part of the Vulkan validation layer that checks whether resource
+accesses are ordered and synchronized correctly. It detects hazards that can
+remain hidden when ordinary valid-usage checks and the rendered image both look
+clean.
+
 ### Participant, coordinator, helper
 
 A **participant** is one CPU thread recording part of a frame's draws. The
-**coordinator** is the thread that owns the frame and always participates; a
-**helper** is the optional second thread it dispatches work to. The number of
-participants is chosen from the draw count.
+**coordinator** is the main rendering thread: it owns the primary command
+buffer, submission, and presentation, and always participates. A **helper** is
+the optional second thread it dispatches secondary-command recording to. The
+number of participants is chosen from the draw count.
+
+### Frozen frame
+
+A frame whose scene mutation, transform resolution, and resource lookup have
+finished. Recording participants receive an immutable `RecordingInput` derived
+from that state rather than reading or modifying the live scene.
 
 ### Device-free test
 
