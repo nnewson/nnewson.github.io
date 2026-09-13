@@ -59,10 +59,10 @@ number was obtained matter as much as the number:
   comparable with a hardware driver;
 - a **decision-bearing implementation** is one declared in advance as eligible
   to affect the decision to retain or reject a change;
-- **A/X/B** is the ordering every measurement uses: a control run `A`, the
-  candidate `X`, then a second control `B`, all using the same executable in one
-  session. The baseline is `C = (A + B) / 2`;
-- **control drift** is the gap between those two controls, `abs(B - A)`. It is
+- an **A₁/X/A₂ bracketed control comparison** runs the control as `A₁`, the
+  candidate as `X`, then the same control again as `A₂`, all using the same
+  executable in one session. The baseline is `C = (A₁ + A₂) / 2`;
+- **control drift** is the gap between those two controls, `abs(A₂ - A₁)`. It is
   the machine's own variation between two runs of identical code, and a
   candidate closer to the baseline than that is **unresolved within drift** —
   it supports no directional claim;
@@ -139,6 +139,9 @@ recording.
 
 ## What had to be true before a measurement meant anything
 
+The completed measurement and attribution work is covered in the
+[CPU-measurement post][cpu-measurement-post].
+
 A total frame duration cannot show how much CPU time belongs to command
 recording, or whether enough of that work can run concurrently to outweigh the
 cost of involving another thread.
@@ -160,8 +163,8 @@ and secondary recording, secondary execution, submission, and blocking waits.
 on CPU work it could actually shorten rather than on time spent waiting for the
 presentation system or the monitor.
 
-Each candidate uses the A/X/B sequence defined above. The difference between
-`A` and `B` is its drift allowance; `X` supports a directional claim only when
+Each candidate uses the `A₁/X/A₂` sequence defined above. The difference between
+`A₁` and `A₂` is its drift allowance; `X` supports a directional claim only when
 its distance from their mean exceeds that allowance. Every reported result
 records its hardware, driver, build configuration, workload, run count, and
 timing boundaries. Ratios are compared within one controlled acquisition; raw
@@ -171,8 +174,10 @@ One more control records all draws directly into the primary command buffer.
 Comparing it with one-participant secondary recording helps locate costs
 introduced by the secondary-command structure. Both modes run through the same
 executable and surrounding frame path, avoiding a comparison between different
-builds. The flag exists for measurement and is not an alternative automatic
-renderer policy.
+builds. The `--direct-primary` flag exists only for measurement. In normal
+automatic selection, the released renderer chooses one recording participant
+below 10,000 draws and two from 10,000 draws upward; it does not select the
+direct-primary path.
 
 ## Can secondary recording work before it can be faster?
 
@@ -201,14 +206,17 @@ measure the production form after its ownership is correct.
 
 ## Where does worker-eligible CPU time actually live?
 
+The phase findings and temporary pool experiment are covered in the
+[CPU-measurement post][cpu-measurement-post].
+
 The phase harness answers several questions with one method:
 
 - How much work is serial snapshot construction rather than recording?
 - How much redundant binding work should disappear before any work is divided?
 - Does a driver place secondary-command cost in recording, execution, or
   submission?
-- Does command-pool reset follow the pool's identity or the commands recorded
-  into it?
+- Is command-pool reset mostly a fixed cost of resetting a pool, or does it grow
+  with the commands recorded into that pool?
 - Does the `eTransient` command-pool hint change that reset cost measurably?
 
 Command-buffer-local binding caches were the first answer. They preserve draw
@@ -227,10 +235,10 @@ recording participant.
 
 The result was not portable in magnitude. At 10,000 draws, worker-pool reset was
 54.02% of active work on Lavapipe and 0.25% on the NVIDIA driver. The same
-architecture exposed two different driver compositions. A registered A/X/B
-experiment found no measurable reset change from `eTransient`; the hint stayed
-because it describes the short-lived pool accurately, while its runtime switch
-and measurement-only branches disappeared.
+architecture exposed two different driver compositions. A registered
+`A₁/X/A₂` experiment found no measurable reset change from `eTransient`; the
+hint stayed because it describes the short-lived pool accurately, while its
+runtime switch and measurement-only branches disappeared.
 
 The direct-primary control resisted a universal conclusion too. Its direction
 changed across environments and, on NVIDIA at 10,000 draws, across sessions.
@@ -333,20 +341,21 @@ rather than retaining the mechanism for one favourable result. The detailed
 posts will show how the eligible share and thresholds were calculated and how
 the gate was exercised.
 
-The first implementation of the persistent
-[`SecondaryRecordingWorker`][source-worker] did not clear that retention rule.
-Both implementations improved at 10,000 draws, but neither passed at both
-workloads. The diagnostics showed the helper finishing last and the coordinator
-resuming late from its completion wait.
+The initial persistent [`SecondaryRecordingWorker`][source-worker] missed that
+retention rule on both Vulkan implementations. It improved the 10,000-draw
+result on each, but neither Lavapipe nor NVIDIA passed at both workloads.
+Diagnostics showed that the helper consistently finished last and that the
+coordinator resumed late after blocking for its completion.
 
-One pre-registered remediation allowed the coordinator to poll completion for
-at most 50 microseconds before falling back to an atomic wait. It did not spin
-while the helper waited between frames, sweep several durations, or permit
-further tuning if the gate still failed. After that single allowed change, the
-full A/X/B measurements were repeated.
+The single pre-registered remediation changed the coordinator's completion
+wait. It polls for at most 50 microseconds after finishing its own recording
+work; if the helper has still not finished, it falls back to the existing
+blocking atomic wait. The helper continues to block while waiting for work
+between frames, and no other polling durations or tuning changes were tried.
+After that single allowed change, the full `A₁/X/A₂` measurements were repeated.
 
-Each multiplier below is the mean one-participant active-work time from `A` and
-`B`, divided by the two-participant time from `X`. A value above `1.0x` is
+Each multiplier below is the mean one-participant active-work time from `A₁`
+and `A₂`, divided by the two-participant time from `X`. A value above `1.0x` is
 faster; one below `1.0x` is slower.
 
 | Implementation | 1,000 draws | 10,000 draws |
@@ -356,14 +365,15 @@ faster; one below `1.0x` is slower.
 
 The Lavapipe measurements used a Release build at 800x600 with Mailbox
 presentation, 16 warm-up frames, and 64 measured frames per arm. Its first
-1,000-draw A/X/B run after the remediation was unusable because the two
-one-participant controls differed by 57.12%. The registered drift rule
-therefore discarded it. One permitted replacement A/X/B run supplied the
-`1.374x` result above; no further retries were allowed.
+1,000-draw `A₁/X/A₂` acquisition after the remediation provided no measurement
+because its two one-participant controls differed by 57.12%. Before another
+result was known, the experiment record allowed exactly one replacement
+acquisition on the same commit and configuration. That replacement supplied
+the `1.374x` result above; no further retries were allowed.
 
 The NVIDIA measurements used an Intel i5-8300H and GeForce GTX 1050, driver
 580.173.02, Release, 800x600 FIFO presentation, with the CPU governor fixed to
-performance on AC power. The same A/X/B ordering and frame counts applied.
+performance on AC power. The same `A₁/X/A₂` ordering and frame counts applied.
 Every reported implementation-and-workload result differed from its
 one-participant baseline by more than the drift between its two controls.
 
@@ -505,6 +515,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place, and the 
 [architecture-0-9]: {% link _architecture/0.9.md %}
 [closing-0-8-post]: {% post_url 2026-09-02-closing-fireengine-08-with-focused-ownership-and-executable-scenarios %}
 [secondary-command-post]: {% post_url 2026-09-12-proving-fireengines-secondary-command-path-before-measuring-it %}
+[cpu-measurement-post]: {% post_url 2026-09-13-measuring-fireengines-cpu-work-before-adding-another-thread %}
 [source-benchmark]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/src/app/benchmark.cpp>
 [source-recording-input]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/recording_input.hpp>
 [source-worker]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/secondary_recording_worker.hpp>

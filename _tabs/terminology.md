@@ -47,29 +47,36 @@ an unusual configuration may be informative without being decision-bearing.
 
 ## Measurement
 
-### A/X/B
+### Bracketed control comparison
 
-The measurement ordering used for every performance claim. A control run `A`,
-then the candidate `X`, then a second control `B`, all using the same executable
-in one session. The control baseline is `C = (A + B) / 2`.
+An `A₁/X/A₂` ordering used for performance comparisons. It runs the control
+configuration as `A₁`, the candidate as `X`, then the same control again as
+`A₂`, all using the same executable in one session. The control baseline is
+`C = (A₁ + A₂) / 2`.
 
 ### Control drift
 
-The gap between the two controls in an A/X/B run, `D = abs(B - A)`. It is the
+The gap between the two matching controls placed around a candidate. It is the
 noise floor for that measurement: the machine's own variation between two runs
-of identical code.
+of identical code. In an `A₁/X/A₂` run, `D = abs(A₂ - A₁)`.
 
 ### Unresolved within drift
 
-A candidate result whose distance from the baseline is no larger than the
-control drift, `abs(X - C) <= D`. Such a result supports no directional claim.
-Only `abs(X - C) > D` counts as a measured difference.
+A candidate result whose distance from the mean control baseline is no larger
+than the control drift. Such a result supports no directional claim. In an
+`A₁/X/A₂` run, only `abs(X - C) > D` counts as a measured difference.
 
 ### Active work
 
 The host work a frame performs, as observed by the coordinating thread,
 excluding time spent blocked waiting for presentation. Speedups are computed
 over active work so that a slower display cannot disguise a change in CPU cost.
+
+### Snapshot
+
+The CPU work that turns the current scene state into the ordered, validated,
+immutable input consumed by command recording. Its internal phases can evolve
+while the boundary remains before recording begins.
 
 ### Materialisation
 
