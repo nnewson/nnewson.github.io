@@ -29,7 +29,7 @@ technical preview. The two implementations then placed its host cost in very
 different phases. Validity made the structure eligible for further work;
 measurement still had to decide whether another thread would earn its cost.
 
-This is the first detailed post based on release 0.9. The [release map][map-post]
+This detailed post is based on release 0.9. The [release map][map-post]
 introduces the questions, measurement language, and limits for the complete
 series. The [0.9 architecture page][architecture-0-9] records only the design
 that survived those investigations.
@@ -329,11 +329,11 @@ decide how command pools, frozen inputs, or completion are owned. Most
 importantly, it does not treat opposite driver observations as noise that can
 be averaged into one portable answer.
 
-The secondary command path is now viable enough to measure. The next question
-is where its CPU time occurs and how much of that time could actually overlap
-with another recording participant. Answering that requires a phase-level
-benchmark, a direct-primary control, and comparison rules written before the
-candidate is measured.
+The secondary command path is now viable enough to measure. The
+[CPU-measurement post][cpu-measurement-post] asks where its CPU time occurs and
+how much of that time could actually overlap with another recording participant.
+Answering that requires a phase-level benchmark, a direct-primary control, and
+comparison rules written before the candidate is measured.
 
 ## Run the surviving validation paths
 
@@ -387,6 +387,7 @@ and recording terms used across the 0.9 series.
 [release-0-8]: {{ page.previous_release_url }}
 [release-0-9]: {{ page.release_url }}
 [map-post]: {% post_url 2026-09-04-mapping-fireengines-path-to-multithreaded-rendering %}
+[cpu-measurement-post]: {% post_url 2026-09-13-measuring-fireengines-cpu-work-before-adding-another-thread %}
 [scenario-post]: {% post_url 2026-09-02-closing-fireengine-08-with-focused-ownership-and-executable-scenarios %}
 [architecture-0-9]: {% link _architecture/0.9.md %}
 [terminology-page]: {% link _tabs/terminology.md %}
