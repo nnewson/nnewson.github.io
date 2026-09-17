@@ -505,7 +505,7 @@ used here.
 [release-0-9]: {{ page.release_url }}
 [map-post]: {% post_url 2026-09-04-mapping-fireengines-path-to-multithreaded-rendering %}
 [cpu-measurement-post]: {% post_url 2026-09-13-measuring-fireengines-cpu-work-before-adding-another-thread %}
-[rebaseline-post]: {% post_url 2026-09-18-rebaselining-fireengine-before-adding-another-recording-thread %}
+[rebaseline-post]: {% post_url 2026-09-17-rebaselining-fireengine-before-adding-another-recording-thread %}
 [architecture-0-8]: {% link _architecture/0.8.md %}
 [architecture-0-9]: {% link _architecture/0.9.md %}
 [terminology-page]: {% link _tabs/terminology.md %}

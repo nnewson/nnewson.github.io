@@ -1,6 +1,6 @@
 ---
 title: "Rebaselining fireEngine before adding another recording thread"
-date: 2026-09-18 10:00:00 +0100
+date: 2026-09-17 10:00:00 +0100
 categories: [fireEngine, Development]
 tags: [fireengine, "0.9", 3d-engine, architecture, multithreading, performance, benchmarking, vulkan, cpp]
 description: >-

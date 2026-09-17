@@ -523,7 +523,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place, and the 
 [secondary-command-post]: {% post_url 2026-09-12-proving-fireengines-secondary-command-path-before-measuring-it %}
 [cpu-measurement-post]: {% post_url 2026-09-13-measuring-fireengines-cpu-work-before-adding-another-thread %}
 [recording-boundary-post]: {% post_url 2026-09-15-making-fireengines-recording-boundary-safe-before-adding-another-thread %}
-[rebaseline-post]: {% post_url 2026-09-18-rebaselining-fireengine-before-adding-another-recording-thread %}
+[rebaseline-post]: {% post_url 2026-09-17-rebaselining-fireengine-before-adding-another-recording-thread %}
 [source-benchmark]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/src/app/benchmark.cpp>
 [source-recording-input]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/recording_input.hpp>
 [source-worker]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/secondary_recording_worker.hpp>
