@@ -409,10 +409,10 @@ What this experiment establishes is narrower and more useful:
   its recording work rather than in an unexplained combined total.
 
 Measurement has now located the candidate region. It has not made that region
-safe to hand to another thread. The boundary investigation must establish
-whether fireEngine can freeze its scene-derived input, separate recording pools
-from submission ownership, and let a recorder consume only the handles and
-values required to encode commands.
+safe to hand to another thread. The [recording-boundary post][recording-boundary-post]
+establishes how fireEngine freezes its scene-derived input, separates recording
+pools from submission ownership, and lets a recorder consume only the handles
+and values required to encode commands.
 
 ## Run the surviving and experimental measurements
 
@@ -474,6 +474,7 @@ used across the measurements.
 [release-0-9]: {{ page.release_url }}
 [map-post]: {% post_url 2026-09-04-mapping-fireengines-path-to-multithreaded-rendering %}
 [secondary-command-post]: {% post_url 2026-09-12-proving-fireengines-secondary-command-path-before-measuring-it %}
+[recording-boundary-post]: {% post_url 2026-09-15-making-fireengines-recording-boundary-safe-before-adding-another-thread %}
 [architecture-0-9]: {% link _architecture/0.9.md %}
 [terminology-page]: {% link _tabs/terminology.md %}
 [reading-page]: {% link _tabs/reading.md %}
