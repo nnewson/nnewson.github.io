@@ -90,6 +90,20 @@ it, so a disappointing result cannot be rescued by moving the bar afterwards.
 The same applies to a registered remediation: one pre-agreed fix, not unlimited
 tuning until the gate passes.
 
+### Attempt gate
+
+A model-based threshold applied before implementing an experiment. It asks
+whether a perfect version of the proposed mechanism has enough theoretical
+headroom to justify trying it; passing does not predict that the real mechanism
+will earn its overhead.
+
+### Retention gate
+
+A threshold applied to the measured implementation after its dispatch,
+synchronization, duplicated setup, and completion costs are included. It asks
+whether enough of the predicted improvement materialised for the mechanism to
+remain in the released design.
+
 ### Direct-primary control
 
 A diagnostic rendering mode that records the same draws straight into the
@@ -119,6 +133,19 @@ A **participant** is one CPU thread recording part of a frame's draws. The
 buffer, submission, and presentation, and always participates. A **helper** is
 the optional second thread it dispatches secondary-command recording to. The
 number of participants is chosen from the draw count.
+
+### Capability boundary
+
+An interface or value that gives a consumer only the data and operations its
+role requires. It is narrower than a `const` view of a more powerful owner:
+operations outside the role are absent rather than merely discouraged.
+
+### Frame slot
+
+The synchronization and per-frame storage reused for one submitted frame. A
+frame slot is independent of both a CPU recording participant and a swapchain
+image; fireEngine cycles slots while the Vulkan implementation chooses which
+presentable image is acquired.
 
 ### Frozen frame
 

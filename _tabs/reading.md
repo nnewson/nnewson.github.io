@@ -51,6 +51,12 @@ synchronization, and presentation.
 
 ## Websites
 
+### [C++ `std::span`](https://en.cppreference.com/w/cpp/container/span)
+
+The cppreference entry for the non-owning contiguous view used by scene draw
+lists and immutable recording inputs. Copying a span copies its view, not the
+storage or the storage's lifetime.
+
 ### [C++ `std::chrono::steady_clock`](https://en.cppreference.com/w/cpp/chrono/steady_clock)
 
 The cppreference entry for the monotonic clock used to measure elapsed frame

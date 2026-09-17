@@ -247,6 +247,9 @@ paired measurement, not an answer 0.9 can infer from isolated runs.
 
 ## Which boundaries can be justified without timing?
 
+The completed ownership and lifetime argument is covered in the
+[recording-boundary post][recording-boundary-post].
+
 The phase measurements identify command-pool reset and secondary recording as
 the candidate region for parallel recording. That creates a different kind of
 question: can exactly that region be handed to another participant without
@@ -304,6 +307,9 @@ not make an unsafe lifetime safe, but changing it determines which performance
 measurement remains valid. The method has to match the uncertainty.
 
 ## Does a second participant earn its overhead?
+
+The completed one-participant audit, rebaseline, and ideal attempt gate are
+covered in the [rebaseline post][rebaseline-post].
 
 Both branches now converge on one measurement boundary:
 
@@ -516,6 +522,8 @@ The [Reading page][reading-page] keeps the site-wide list in one place, and the 
 [closing-0-8-post]: {% post_url 2026-09-02-closing-fireengine-08-with-focused-ownership-and-executable-scenarios %}
 [secondary-command-post]: {% post_url 2026-09-12-proving-fireengines-secondary-command-path-before-measuring-it %}
 [cpu-measurement-post]: {% post_url 2026-09-13-measuring-fireengines-cpu-work-before-adding-another-thread %}
+[recording-boundary-post]: {% post_url 2026-09-15-making-fireengines-recording-boundary-safe-before-adding-another-thread %}
+[rebaseline-post]: {% post_url 2026-09-18-rebaselining-fireengine-before-adding-another-recording-thread %}
 [source-benchmark]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/src/app/benchmark.cpp>
 [source-recording-input]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/recording_input.hpp>
 [source-worker]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/secondary_recording_worker.hpp>
