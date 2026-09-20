@@ -134,6 +134,9 @@ known outcome rather than following an argument:
 - every named test or CTest registration exists, and any `-R` regex selects
   exactly the intended set;
 - every section quoting source links to the file that source lives in;
+- manually open every source link used only by prose and confirm that its range
+  supports the surrounding claim — the source-link checker covers sections
+  that quote source, not prose-only links;
 - link references balance: nothing undefined, nothing orphaned;
 - `python3 tools/check_diagrams.py` is clean;
 - `python3 tools/check_source_links.py` is clean;
