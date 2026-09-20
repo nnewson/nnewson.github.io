@@ -48,6 +48,13 @@ collapse the set into a table and keep only the case that carries the weight.
 defect, the mechanism that detects defects is already established. Walk the
 order once looking only for this.
 
+**State every registered constraint before presenting any outcome it can
+accept, reject, or invalidate.** Gates, thresholds, drift rules, permitted
+remediations, and replacement allowances all belong in the opening, not at the
+point where each one first bites. A rule introduced after the result it governs
+is structurally a preregistration and rhetorically an excuse — the reader
+cannot tell the difference, and neither can the author a year later.
+
 **Code excerpts argue or they go.** A before/after pair usually argues. A
 single excerpt has to justify itself. Link to the tag with a line range where
 the exact lines matter.
@@ -131,8 +138,16 @@ known outcome rather than following an argument:
 - every linked source path resolves **at the tag**, not on a branch;
 - every quoted snippet matches the tag, including field order;
 - every count — tests, registrations, cases — checked against the tag;
+- every **derived** figure recomputed from its inputs, not compared against
+  the record. A table whose other cells all satisfy a relation and whose one
+  outlier does not is reporting a data-entry error, and checking the record
+  passes it in both directions;
 - every named test or CTest registration exists, and any `-R` regex selects
   exactly the intended set;
+- when working notes or a release notebook exist, every decision-bearing rule,
+  measurement, failed experiment, environment, and evidence limit has a durable
+  home in a published post or architecture page — the notebook is provenance,
+  not the permanent record;
 - every section quoting source links to the file that source lives in;
 - manually open every source link used only by prose and confirm that its range
   supports the surrounding claim — the source-link checker covers sections

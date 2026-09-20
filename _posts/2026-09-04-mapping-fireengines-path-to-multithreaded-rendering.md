@@ -312,6 +312,8 @@ The completed one-participant audit, rebaseline, and ideal attempt gate are
 covered in the [rebaseline post][rebaseline-post].
 The completed coordinator/helper protocol is covered in the
 [coordination post][coordination-post].
+The complete retention experiment and resulting workload policy are covered in
+the [retention post][retention-post].
 
 Both branches now converge on one measurement boundary:
 
@@ -527,6 +529,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place, and the 
 [recording-boundary-post]: {% post_url 2026-09-15-making-fireengines-recording-boundary-safe-before-adding-another-thread %}
 [rebaseline-post]: {% post_url 2026-09-17-rebaselining-fireengine-before-adding-another-recording-thread %}
 [coordination-post]: {% post_url 2026-09-18-coordinating-fireengines-second-recording-participant %}
+[retention-post]: {% post_url 2026-09-20-deciding-when-fireengines-second-recording-participant-earns-its-overhead %}
 [source-benchmark]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/src/app/benchmark.cpp>
 [source-recording-input]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/recording_input.hpp>
 [source-worker]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/secondary_recording_worker.hpp>

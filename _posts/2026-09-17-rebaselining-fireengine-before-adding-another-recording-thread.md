@@ -330,7 +330,9 @@ For NVIDIA at 10,000 draws, the ideal model predicts a reduction of about
 baseline. Dispatch, synchronization, the second command buffer's fixed state,
 load imbalance, and joining the helper all have to fit inside the difference.
 
-Only the worker measurement can say whether they do.
+Only the worker measurement can say whether they do. The [retention
+post][retention-post] records that decision and the workload policy derived from
+it.
 
 ## Run the released one-participant path
 
@@ -379,6 +381,7 @@ across the 0.9 series.
 [map-post]: {% post_url 2026-09-04-mapping-fireengines-path-to-multithreaded-rendering %}
 [recording-boundary-post]: {% post_url 2026-09-15-making-fireengines-recording-boundary-safe-before-adding-another-thread %}
 [coordination-post]: {% post_url 2026-09-18-coordinating-fireengines-second-recording-participant %}
+[retention-post]: {% post_url 2026-09-20-deciding-when-fireengines-second-recording-participant-earns-its-overhead %}
 [architecture-0-9]: {% link _architecture/0.9.md %}
 [terminology-page]: {% link _tabs/terminology.md %}
 [reading-page]: {% link _tabs/reading.md %}
