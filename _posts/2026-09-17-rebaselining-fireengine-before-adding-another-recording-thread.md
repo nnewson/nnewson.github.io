@@ -319,6 +319,10 @@ reduction and minimum acceptable materialisation are fixed before the helper
 runs. A disappointing measurement cannot be rescued by treating the ideal
 model as though it had already promised a speedup.
 
+The [coordination post][coordination-post] establishes the coordinator/helper
+protocol in the middle of that chain without yet claiming a performance
+result.
+
 For NVIDIA at 10,000 draws, the ideal model predicts a reduction of about
 `262.07 us`. The registered retention gate requires at least half of that:
 `131.03 us`. The two-participant path must therefore measure no more than
@@ -374,6 +378,7 @@ across the 0.9 series.
 [release-0-9]: {{ page.release_url }}
 [map-post]: {% post_url 2026-09-04-mapping-fireengines-path-to-multithreaded-rendering %}
 [recording-boundary-post]: {% post_url 2026-09-15-making-fireengines-recording-boundary-safe-before-adding-another-thread %}
+[coordination-post]: {% post_url 2026-09-18-coordinating-fireengines-second-recording-participant %}
 [architecture-0-9]: {% link _architecture/0.9.md %}
 [terminology-page]: {% link _tabs/terminology.md %}
 [reading-page]: {% link _tabs/reading.md %}

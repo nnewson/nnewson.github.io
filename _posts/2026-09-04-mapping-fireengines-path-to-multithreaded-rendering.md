@@ -310,6 +310,8 @@ measurement remains valid. The method has to match the uncertainty.
 
 The completed one-participant audit, rebaseline, and ideal attempt gate are
 covered in the [rebaseline post][rebaseline-post].
+The completed coordinator/helper protocol is covered in the
+[coordination post][coordination-post].
 
 Both branches now converge on one measurement boundary:
 
@@ -343,9 +345,9 @@ release registered two different decisions before adding the helper:
 The first rule avoids adding thread coordination when even a perfect split
 predicts less than a 15% improvement. The second requires a real implementation
 to deliver a meaningful share of that prediction at both selected workloads,
-rather than retaining the mechanism for one favourable result. The detailed
-posts will show how the eligible share and thresholds were calculated and how
-the gate was exercised.
+rather than retaining the mechanism for one favourable result. The rebaseline
+post shows how the eligible share and attempt threshold were calculated; the
+results below record how the retention gate was exercised.
 
 The initial persistent [`SecondaryRecordingWorker`][source-worker] missed that
 retention rule on both Vulkan implementations. It improved the 10,000-draw
@@ -524,6 +526,7 @@ The [Reading page][reading-page] keeps the site-wide list in one place, and the 
 [cpu-measurement-post]: {% post_url 2026-09-13-measuring-fireengines-cpu-work-before-adding-another-thread %}
 [recording-boundary-post]: {% post_url 2026-09-15-making-fireengines-recording-boundary-safe-before-adding-another-thread %}
 [rebaseline-post]: {% post_url 2026-09-17-rebaselining-fireengine-before-adding-another-recording-thread %}
+[coordination-post]: {% post_url 2026-09-18-coordinating-fireengines-second-recording-participant %}
 [source-benchmark]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/src/app/benchmark.cpp>
 [source-recording-input]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/recording_input.hpp>
 [source-worker]: <https://github.com/nnewson/fireEngine-tutorial/blob/0.9/include/fire_engine/render/detail/secondary_recording_worker.hpp>

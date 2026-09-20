@@ -62,6 +62,22 @@ storage or the storage's lifetime.
 The cppreference entry for the monotonic clock used to measure elapsed frame
 time without being affected by changes to the system wall clock.
 
+### [C++ `std::counting_semaphore`](https://en.cppreference.com/w/cpp/thread/counting_semaphore)
+
+The cppreference entry for the C++20 synchronization primitive used to park
+fireEngine's persistent recording helper until the coordinator publishes work.
+
+### [C++ `std::atomic::wait`](https://en.cppreference.com/w/cpp/atomic/atomic/wait)
+
+The cppreference entry for blocking until an atomic value changes, including
+the need to recheck the value after a wake rather than treating notification
+alone as the state transition.
+
+### [C++ `std::exception_ptr`](https://en.cppreference.com/w/cpp/error/exception_ptr)
+
+The cppreference entry for capturing an exception on one thread and rethrowing
+it later after another thread has completed its borrowed work.
+
 ### [C++ `std::expected`](https://en.cppreference.com/w/cpp/utility/expected.html)
 
 The cppreference language-library entry for the C++23 vocabulary type that
