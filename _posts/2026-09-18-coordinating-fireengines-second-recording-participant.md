@@ -33,9 +33,9 @@ still reading.
 
 This post covers the concurrent-recording mechanism from the [0.9 release
 map][map-post]. It deliberately stops before asking whether the mechanism earns
-its cost. The final measurement post will price dispatch, duplicated setup,
-completion, and the released completion-wait policy against the registered
-retention gate.
+its cost. The [retention post][retention-post] prices dispatch, duplicated
+setup, completion, and the released completion-wait policy against the
+registered retention gate.
 
 > Code for this article: [fireEngine 0.9][release-0-9]
 >
@@ -400,9 +400,9 @@ paired one/two/one measurement
 retention gate and workload policy
 ```
 
-The next post can now ask whether the real implementation earns its overhead
-without mixing that question with input lifetime, exception safety, or whether
-the command structure is valid.
+The [retention post][retention-post] can now ask whether the real implementation
+earns its overhead without mixing that question with input lifetime, exception
+safety, or whether the command structure is valid.
 
 ## Run the released split path
 
@@ -451,6 +451,7 @@ used across the 0.9 series.
 [map-post]: {% post_url 2026-09-04-mapping-fireengines-path-to-multithreaded-rendering %}
 [recording-boundary-post]: {% post_url 2026-09-15-making-fireengines-recording-boundary-safe-before-adding-another-thread %}
 [rebaseline-post]: {% post_url 2026-09-17-rebaselining-fireengine-before-adding-another-recording-thread %}
+[retention-post]: {% post_url 2026-09-20-deciding-when-fireengines-second-recording-participant-earns-its-overhead %}
 [architecture-0-9]: {% link _architecture/0.9.md %}
 [terminology-page]: {% link _tabs/terminology.md %}
 [reading-page]: {% link _tabs/reading.md %}
