@@ -23,7 +23,7 @@ fireEngine first had to establish that a secondary can inherit the active
 dynamic-rendering state, contain the draw commands, and execute cleanly from
 the primary on the available Vulkan implementations.
 
-The result is deliberately narrower than a speed claim. The structure passed
+The result is narrower than a speed claim. The structure passed
 standard and synchronization validation on Mesa Lavapipe and the KosmicKrisp
 technical preview. The two implementations then placed its host cost in very
 different phases. Validity made the structure eligible for further work;

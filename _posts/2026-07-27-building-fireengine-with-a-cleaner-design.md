@@ -126,11 +126,11 @@ non-indexed draw. The persistent GLFW event loop renders until the window
 closes, while a bounded mode lets CTest prove one complete presented frame.
 Swapchain recreation remains a later concern: an out-of-date or suboptimal
 surface reports the change and exits cleanly rather than rebuilding. That leaves
-[release 0.6][release-0-6] as a complete but deliberately small first triangle.
+[release 0.6][release-0-6] as a complete but small first triangle.
 
 The triangle is not the destination. It is the smallest path that exercises
 every stage a real frame uses, which makes it a solid base to widen rather than
-a demo to throw away. The next step keeps that image deliberately unchanged
+a demo to throw away. The next step keeps that image unchanged
 while restructuring everything behind it: meshes, materials, and scene
 hierarchy become Vulkan-free descriptions that a renderer compiles into GPU
 work, with unit tests covering the parts that no longer need a device.

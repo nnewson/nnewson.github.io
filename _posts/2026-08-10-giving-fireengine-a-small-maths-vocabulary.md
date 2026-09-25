@@ -22,7 +22,7 @@ Those relationships are much easier to state with a matrix type than with
 arrays whose meaning exists only in the code that fills them.
 
 fireEngine therefore gains its first maths layer: `Vec3`, `Vec4`, and `Mat4`.
-It is deliberately small. The release adds only the storage and operations
+It is small. The release adds only the storage and operations
 required to position and scale the tutorial triangle, compose scene hierarchy,
 and cross the existing CPU/shader boundary without repacking data.
 

@@ -388,7 +388,7 @@ return *cachedPlan_;
 The renderer can compare the generation it has already compiled with the
 current one; an unchanged value means there is no new resource plan to consume.
 
-This is deliberately a single-entry cache. Returning to a plan used two scene
+This is a single-entry cache. Returning to a plan used two scene
 configurations ago rebuilds it rather than searching a history. That keeps
 ownership, invalidation, and memory use obvious for the first implementation.
 
@@ -531,7 +531,7 @@ Vulkan smoke test outside this focused run.
 
 ## Diagnose the new failure boundaries
 
-Preparation deliberately reports CPU-description problems before Vulkan work
+Preparation reports CPU-description problems before Vulkan work
 begins. The input that changed determines where to look.
 
 ### A scene draw refers to a missing render object

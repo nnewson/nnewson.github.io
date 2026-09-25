@@ -17,7 +17,7 @@ triangle is still part of the renderer, application setup knows about most of
 the Vulkan ownership tree, and testing the interesting decisions generally
 means creating a window and a device.
 
-The next stage will keep the visible result deliberately familiar. Rather than
+The next stage will keep the visible result familiar. Rather than
 adding more effects immediately, it will move the same triangle through the
 boundaries that future models and scenes will use. This gives us a chance to
 separate application data, scene state, render preparation, and Vulkan work

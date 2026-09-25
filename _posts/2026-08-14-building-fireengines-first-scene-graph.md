@@ -439,7 +439,7 @@ the list length before combining any IDs, making the number of dependencies
 part of the input from the start. Mixing IDs in traversal order means `[A, B]`,
 `[B, A]`, and `[A, A]` describe different inputs.
 
-World transforms are deliberately absent. Moving an existing instance changes
+World transforms are absent. Moving an existing instance changes
 the commands recorded for the current frame, but it does not require a new mesh
 or material representation. Attaching, removing, or reordering render objects
 does change the dependency input.

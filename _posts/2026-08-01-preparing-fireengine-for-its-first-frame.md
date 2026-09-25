@@ -214,7 +214,7 @@ private:
 };
 ```
 
-The class is deliberately small. It establishes one owner, releases that owner
+The class is small. It establishes one owner, releases that owner
 in its destructor, and exposes the handle later resource classes will need.
 Copy and move operations stay disabled so its place in the startup lifetime is
 unambiguous. The public declaration is in

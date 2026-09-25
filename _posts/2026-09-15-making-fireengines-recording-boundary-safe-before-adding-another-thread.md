@@ -487,7 +487,7 @@ set `VK_LAYER_VALIDATE_SYNC=1` themselves.
 
 - [C++ `std::span` reference][reading-span] — the non-owning view used by both
   scene draw lists and compiled recording packets, including the lifetime
-  obligations it deliberately does not solve.
+  obligations it does not solve.
 - [C++ Software Design][reading-cpp-design] — the dependency and interface
   background for giving a consumer a narrow capability instead of an entire
   owner.
