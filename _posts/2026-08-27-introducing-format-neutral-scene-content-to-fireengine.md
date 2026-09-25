@@ -205,7 +205,7 @@ reachable from the chosen scene.
 
 See the complete [`gltf_loader.cpp`][source-gltf-loader-cpp].
 
-## Parse a deliberately constrained document
+## Parse a constrained document
 
 The parser options come from [`gltf_loader.cpp`][source-gltf-loader-cpp].
 

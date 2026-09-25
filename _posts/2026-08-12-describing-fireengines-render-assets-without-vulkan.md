@@ -218,7 +218,7 @@ The mesh owns ordinary vectors. It does not own a vertex buffer, index buffer,
 VMA allocation, device address, or upload state. Those are compiled resources,
 not part of the source description.
 
-## Keep the first material deliberately small
+## Keep the first material small
 
 A material describes how a mesh should appear. Release 0.7 needs only one
 unlit colour factor:
