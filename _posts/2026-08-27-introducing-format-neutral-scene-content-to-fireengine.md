@@ -4,7 +4,7 @@ date: 2026-08-27 10:00:00 +0100
 categories: [fireEngine, Development]
 tags: [fireengine, "0.8", gltf, assets, animation, scene-graph, architecture, cpp]
 description: >-
-  Compose fireEngine's Vulkan-free scene data and import a deliberately narrow
+  Compose fireEngine's Vulkan-free scene data and import a narrow
   glTF slice without leaking the source format into the engine model.
 release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.8"
 previous_release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.7"
@@ -17,7 +17,7 @@ validated result.
 
 `SceneContent` supplies that coherent content boundary. It groups the render
 assets, hierarchy, and reusable animations that describe a scene. `GltfLoader`
-translates a deliberately small glTF 2.0 subset into that engine-owned result,
+translates a small glTF 2.0 subset into that engine-owned result,
 validates the composition, and then discards all parser-specific state.
 
 The completed release loads AnimatedCube through this path, advances its
@@ -205,7 +205,7 @@ reachable from the chosen scene.
 
 See the complete [`gltf_loader.cpp`][source-gltf-loader-cpp].
 
-## Parse a deliberately constrained document
+## Parse a constrained document
 
 The parser options come from [`gltf_loader.cpp`][source-gltf-loader-cpp].
 

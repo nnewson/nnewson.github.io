@@ -410,7 +410,7 @@ This is normalized linear interpolation, or nlerp. It does not provide the
 constant angular velocity of spherical interpolation. glTF describes spherical
 interpolation for linear rotation channels, while allowing implementations to
 approximate interpolation for their target accuracy and performance. Release
-0.8's deliberately narrow slice uses shortest-arc nlerp for AnimatedCube;
+0.8's narrow slice uses shortest-arc nlerp for AnimatedCube;
 adding slerp would be a separate improvement rather than something this code
 quietly claims to implement.
 
@@ -627,7 +627,7 @@ frame as a recoverable missing pose.
 
 ## What this part of release 0.8 gives us
 
-This part of release 0.8 establishes a deliberately small playback path:
+This part of release 0.8 establishes a small playback path:
 
 - target-independent animation channels retain ordered quaternion samples;
 - each scene `Animator` owns its channel binding, time, and looping policy;

@@ -76,7 +76,7 @@ image, pipeline, swapchain, compilation, and selection declarations live below
 `fire_engine::detail`, so their location and qualification say the same thing:
 they are implementation vocabulary, not a second supported renderer API.
 
-This boundary is deliberately narrower than “no public header includes
+This boundary is narrower than “no public header includes
 Vulkan.” The platform window still exposes the GLFW-Vulkan surface bridge, and
 0.8's internal debug support still uses Vulkan types. The claim is that
 application rendering goes through `Renderer`, and renderer-owned Vulkan types

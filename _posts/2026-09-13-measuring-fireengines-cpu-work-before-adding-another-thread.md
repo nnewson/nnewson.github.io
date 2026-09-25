@@ -88,7 +88,7 @@ creates one synthetic root with a configurable number of child nodes. Every
 child uses the same compiled cube render object, while their transforms place
 them on a grid. A fixed mutation advances the root before each frame.
 
-That fixture deliberately removes several variables:
+That fixture removes several variables:
 
 | Property | Benchmark choice | Consequence |
 |---|---|---|

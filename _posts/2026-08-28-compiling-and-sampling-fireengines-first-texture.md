@@ -11,7 +11,7 @@ previous_release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/t
 ---
 
 Release 0.8 can describe images and textures without Vulkan, then load those
-descriptions from a deliberately narrow glTF slice. At that point the CPU owns
+descriptions from a narrow glTF slice. At that point the CPU owns
 tightly packed RGBA8 pixels, filtering and wrapping choices, and material
 references. None of those values is yet an image the fragment shader can
 sample.

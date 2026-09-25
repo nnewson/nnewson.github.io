@@ -189,7 +189,7 @@ rendering, execute inherited secondary command buffers with the correct colour
 and depth formats, and then end and present cleanly on the available
 implementations?
 
-A deliberately small spike answered yes under standard and synchronization
+A small spike answered yes under standard and synchronization
 validation. KosmicKrisp on Apple Silicon and Mesa Lavapipe both accepted the
 command structure. That established the Vulkan contract but not its cost.
 
@@ -400,7 +400,7 @@ dispatch and join, so the cost of threading remains inside the comparison.
 
 ## What the evidence does not establish
 
-The released policy is deliberately narrower than the experiment that produced
+The released policy is narrower than the experiment that produced
 it.
 
 | Claim 0.9 does not make | Evidence limit |

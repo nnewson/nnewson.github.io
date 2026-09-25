@@ -32,7 +32,7 @@ No error path may let stack unwinding invalidate input that the other thread is
 still reading.
 
 This post covers the concurrent-recording mechanism from the [0.9 release
-map][map-post]. It deliberately stops before asking whether the mechanism earns
+map][map-post]. It stops before asking whether the mechanism earns
 its cost. The [retention post][retention-post] prices dispatch, duplicated
 setup, completion, and the released completion-wait policy against the
 registered retention gate.
@@ -46,7 +46,7 @@ registered retention gate.
 
 ## Introducing the coordination vocabulary
 
-Three roles remain deliberately asymmetric:
+Three roles remain asymmetric:
 
 - a **participant** is one CPU thread that resets its own command pool and
   records one range of secondary commands;

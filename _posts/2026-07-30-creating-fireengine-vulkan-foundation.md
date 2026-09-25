@@ -9,7 +9,7 @@ description: >-
 release_url: "https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.1"
 ---
 
-The first step in rebuilding fireEngine is deliberately small: create a Vulkan
+The first step in rebuilding fireEngine is small: create a Vulkan
 instance, prove that it was created, and let C++ destroy it safely.
 
 There is no window or rendered triangle yet. That is useful. It gives us room

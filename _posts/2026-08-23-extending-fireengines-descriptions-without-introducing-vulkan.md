@@ -28,7 +28,7 @@ node-local playback state, and each scene node receives one explicit component
 role.
 
 The completed release loads, animates, textures, and renders AnimatedCube. This
-post deliberately stops at the description boundary: the loader, playback
+post stops at the description boundary: the loader, playback
 system, and renderer are consumers of these types, not evidence that Vulkan or
 glTF belongs inside them.
 
@@ -844,7 +844,7 @@ constrained glTF loader that populates it.
   representation, handles, and the boundary between source and runtime data.
 - [glTF 2.0 specification: Textures][reading-gltf-textures] — the Khronos
   definitions of images, samplers, textures, and texture coordinates that
-  inform this deliberately narrow model.
+  inform this narrow model.
 - [glTF 2.0 specification: Animations][reading-gltf-animations] — the source
   format's separation of samplers, channels, target nodes, target paths, input
   times, and output values.
