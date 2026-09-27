@@ -23,6 +23,14 @@ python3 tools/check_diagrams.py || {
     exit 1
 }
 
+python3 tools/check_reading_links.py || {
+    echo >&2
+    echo "pre-commit: reading-link check failed (see above)." >&2
+    echo "  a post cites background material that _tabs/reading.md does not list." >&2
+    echo "  Add an entry to the Reading page, or drop the citation." >&2
+    exit 1
+}
+
 python3 tools/check_source_links.py || {
     echo >&2
     echo "pre-commit: source-link check failed (see above)." >&2
