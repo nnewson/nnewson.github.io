@@ -154,9 +154,11 @@ known outcome rather than following an argument:
   that quote source, not prose-only links;
 - link references balance: nothing undefined, nothing orphaned;
 - `python3 tools/check_diagrams.py` is clean;
+- `python3 tools/check_reading_links.py` is clean;
 - `python3 tools/check_source_links.py` is clean;
 - `bundle exec jekyll build` is clean;
-- reading links are present in `_tabs/reading.md`.
+- reading links are present in `_tabs/reading.md` (now checked by the script
+  above, so this is a reminder to add the entry rather than a manual sweep).
 
-The two script checks run automatically in `.githooks/pre-commit`. The build
+The three script checks run automatically in `.githooks/pre-commit`. The build
 and everything above them are judgement or manual steps no tool makes for you.
