@@ -15,6 +15,26 @@ tag remains the authority on implementation details. Earlier releases are
 omitted because their architecture is too simple to warrant a separate
 reference.
 
+## fireEngine 0.10 — directional shadows
+
+Version 0.10 compiles one scene into separate shadow and forward inputs. A
+slot-local shadow map connects the two passes, while the renderer retains
+responsibility for frame reuse, submission and presentation. Its development
+story examines the image, lifetime and measurement evidence behind that design.
+
+> **Architecture as released:** [fireEngine 0.10 architecture]({% link _architecture/0.10.md %})
+>
+> **Source and downloads:** [GitHub release 0.10](https://github.com/nnewson/fireEngine-tutorial/releases/tag/0.10)
+>
+> **Every post for this release:** [posts tagged 0.10](/tags/0-10/)
+{: .prompt-info }
+
+### 0.10 design and evidence
+
+- [Mapping fireEngine's path to directional shadows]({% post_url 2026-10-15-mapping-fireengines-path-to-directional-shadows %}) — release map
+
+Supporting posts will be added as they are published.
+
 ## fireEngine 0.9 — multithreaded command recording
 
 Version 0.9 separates mutable preparation from immutable recording input, then

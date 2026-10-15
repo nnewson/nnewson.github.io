@@ -3,11 +3,12 @@ icon: fas fa-list
 order: 6
 ---
 
-Terms that recur across the fireEngine posts and are specific to this project
-or its tooling. Vulkan's own vocabulary is defined by the
-[specification](https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html) and is
-not repeated here; what follows is the set a competent Vulkan reader would
-still have to guess at.
+Terms that recur across the fireEngine posts, including project vocabulary and
+the particular meaning the engine gives to standard graphics terms. Vulkan's
+API vocabulary is defined by the
+[specification](https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html);
+this page explains the choices a reader would otherwise have to infer from
+the posts.
 
 Each post introduces the terms it needs near the top. This page collects them
 in one place for anyone arriving part-way through a series.
@@ -68,9 +69,32 @@ than the control drift. Such a result supports no directional claim. In an
 
 ### Active work
 
-The host work a frame performs, as observed by the coordinating thread,
-excluding time spent blocked waiting for presentation. Speedups are computed
-over active work so that a slower display cannot disguise a change in CPU cost.
+A release-specific sum of measured CPU phases used to compare the work of
+producing a frame, separately from frame-fence, image-acquisition and
+presentation-fence waits and the presentation call. It is neither whole-frame
+elapsed time nor a sum of every thread's CPU time. The 0.10 definition is
+[total active work](#total-active-work) below.
+
+### Total active work
+
+The primary measurement in fireEngine 0.10, adding these named CPU phases:
+
+- snapshot: transform update, draw-list build and frame recording-input build;
+- shared frame-uniform update;
+- shadow command-pool reset and primary command recording;
+- forward coordinator command-pool reset, secondary recording region, primary
+  command recording and secondary command execution; and
+- queue submission.
+
+The [released measurement definition](https://github.com/nnewson/fireEngine-tutorial/blob/0.10/tools/benchmark/benchmark_report.py)
+excludes frame-fence wait, image-acquisition wait, presentation-fence wait and
+the presentation call. The forward recording region still includes dispatch
+and waiting for the helper: that is coordination cost, not an excluded frame
+wait. Overlapping participant diagnostics are not added again.
+
+This is a sum of instrumented host phases, not all application or pass-call
+bookkeeping, GPU time or frame rate. Comparing its values does not measure
+the net cost of enabling shadows without a matched shadows-off control.
 
 ### Snapshot
 
@@ -109,7 +133,10 @@ remain in the released design.
 A diagnostic rendering mode that records the same draws straight into the
 primary command buffer instead of into secondary buffers. Comparing it with the
 normal path prices what secondary command buffers cost on a given driver rather
-than assuming that cost is negligible.
+than assuming that cost is negligible. Version 0.9 names the option
+`--direct-primary`; 0.10 renames it to `--forward-direct-primary` and rejects
+the old spelling. The new name makes its scope explicit: only forward
+recording changes; the shadow pass still runs.
 
 ### Positive control
 
@@ -128,11 +155,18 @@ clean.
 
 ### Participant, coordinator, helper
 
-A **participant** is one CPU thread recording part of a frame's draws. The
-**coordinator** is the main rendering thread: it owns the primary command
-buffer, submission, and presentation, and always participates. A **helper** is
-the optional second thread it dispatches secondary-command recording to. The
-number of participants is chosen from the draw count.
+A **participant** is one CPU thread recording part of the forward pass's draws.
+The **coordinator** is the main rendering thread: it controls primary recording,
+submission and presentation, and always participates in forward recording.
+A **helper** is the optional second thread it dispatches forward secondary
+recording to. The number of participants is chosen from the forward draw count;
+0.10's shadow pass records serially on the coordinator.
+
+The diagnostic override is `--recording-threads` in 0.9 and
+`--forward-recording-participants` in 0.10, taking either `1` or `2` as its
+argument. Version 0.10 rejects the old spelling;
+the count includes the coordinator, not just helpers, and applies only to
+forward recording.
 
 ### Capability boundary
 
@@ -150,8 +184,10 @@ presentable image is acquired.
 ### Frozen frame
 
 A frame whose scene mutation, transform resolution, and resource lookup have
-finished. Recording participants receive an immutable `RecordingInput` derived
-from that state rather than reading or modifying the live scene.
+finished. Recording participants receive immutable input derived from that
+state rather than reading or modifying the live scene. The complete input is
+named `RecordingInput` in 0.9 and `FrameRecordingInput` in 0.10, where it
+contains separate restricted views for the two passes.
 
 ### Device-free test
 
@@ -171,3 +207,70 @@ set of engine pieces.
 A type or layer that carries no Vulkan header, handle, or enum. It is the
 boundary that keeps content, scene, and animation code independent of the
 renderer, and testable without a device.
+
+## Shadow rendering
+
+These definitions describe the conventions used in fireEngine 0.10.
+
+### Caster
+
+An object included in the light-view depth rendering so it can block light
+from reaching other surfaces, including its own. In 0.10,
+`RenderObject::castsShadow` controls whether a draw enters the shadow packet
+sequence. It defaults to true and does not control whether the object appears
+in the camera view.
+
+### Receiver
+
+A surface whose forward shading uses the shadow map to decide whether it is
+occluded from the light. Every forward draw in 0.10 receives shadows. The
+procedural ground plane is **receive-only**: it is drawn and samples the map,
+but its `castsShadow` value is false, so it contributes no depth to that map.
+An object can be both a caster and a receiver.
+
+### Shadow map
+
+A depth image rendered from the light's view. The forward shader projects a
+receiver into that view and compares its depth with the stored depth to test
+for occlusion. Version 0.10 uses one fixed 1024-by-1024 map per frame slot;
+the two maps are independent of swapchain images and survive window resizing.
+
+### Frustum
+
+The volume covered by a view's projection, bounded by its sides and near/far
+planes. A perspective camera's frustum widens with distance. The orthographic
+light view in 0.10 covers a box whose width and height stay constant. Receiver
+positions outside that light volume are treated as lit by the shadow lookup.
+
+### Depth bias
+
+An adjustment to the depths used in a shadow comparison to reduce erroneous
+self-shadowing caused by finite precision and sampling. Version 0.10 applies
+constant and slope-scaled bias when writing the map, then subtracts a separate
+small offset from the receiver's comparison depth. These are different places
+to adjust the comparison; excessive bias can detach a shadow from its caster.
+
+### Slope-scaled depth bias
+
+The part of raster depth bias that grows with a primitive's depth slope in
+framebuffer coordinates. It supplements the constant term on surfaces whose
+depth changes rapidly across pixels. In 0.10 it is applied during the shadow
+pass, using a slope factor of 1.75; it does not change the receiver offset or
+provide a normal-based lighting calculation.
+
+### Publication
+
+In the shadow posts, making the shadow pass's depth writes available and
+visible to later fragment-shader sampling. `ShadowRecorder` records the image
+barrier after depth rendering, including the transition to a read-only depth
+layout. This is a GPU memory dependency; it neither transfers C++ ownership
+nor replaces the frame-slot fence that protects reuse of the map.
+
+### Pass input
+
+The immutable values and non-owning handles a particular recorder receives.
+The frame compiler resolves the scene once and produces two restricted views:
+shadow input contains geometry and model transforms, while forward input also
+contains material values and texture handles. Neither view exposes the owners,
+allocator, queue, or mutable scene. Its CPU storage must remain valid until
+every recorder using it has finished.
