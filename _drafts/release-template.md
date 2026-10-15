@@ -156,7 +156,11 @@ known outcome rather than following an argument:
 - `python3 tools/check_diagrams.py` is clean;
 - `python3 tools/check_reading_links.py` is clean;
 - `python3 tools/check_source_links.py` is clean;
-- `bundle exec jekyll build` is clean;
+- `bundle exec jekyll build --unpublished` is clean, and the post's generated
+  page has been inspected: a normal build skips `published: false` posts;
+  add `--future` for a future-dated post or `--drafts` for one in `_drafts/`;
+- before publishing, remove `published: false`, update the release index with
+  the post and tag-page links, and check a normal `bundle exec jekyll build`;
 - reading links are present in `_tabs/reading.md` (now checked by the script
   above, so this is a reminder to add the entry rather than a manual sweep).
 
