@@ -32,8 +32,9 @@ story examines the image, lifetime and measurement evidence behind that design.
 ### 0.10 design and evidence
 
 - [Mapping fireEngine's path to directional shadows]({% post_url 2026-10-15-mapping-fireengines-path-to-directional-shadows %}) — release map
+- [Separating fireEngine's responsibilities before adding another pass]({% post_url 2026-10-17-separating-fireengines-responsibilities-before-adding-another-pass %})
 
-Supporting posts will be added as they are published.
+Further supporting posts will be added as they are published.
 
 ## fireEngine 0.9 — multithreaded command recording
 
